@@ -1,0 +1,35 @@
+name: flutter_sm_network
+description: "A new Flutter package project."
+version: 0.0.1
+publish_to: none
+
+environment:
+  sdk: ">=3.3.1 <4.0.0"
+  flutter: ">=1.17.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_sm_models:
+    git:
+      url: https://github.com/shay-wong/flutter_sm_models.git
+      ref: main
+  flutter_sm_logger:
+    git:
+      url: https://github.com/shay-wong/flutter_sm_logger.git
+      ref: main
+  json_annotation: ^4.8.1
+  dio: ^5.4.1
+  dio_cache_interceptor: ^3.5.0
+  cross_file: ^0.3.4+1
+  pull_to_refresh: ^2.0.0
+  xml: ^6.5.0
+  convert: ^3.1.1
+  crypto: ^3.0.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.1
+
+flutter: null
