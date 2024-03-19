@@ -1,7 +1,9 @@
 name: flutter_sm_network
-description: "A new Flutter package project."
+description: "A Flutter networking library."
 version: 0.0.1
-publish_to: none
+homepage: "https://github.com/shay-wong/flutter_sm_models"
+repository: "https://github.com/shay-wong/flutter_sm_models"
+issue_tracker: "https://github.com/shay-wong/flutter_sm_models/issues"
 
 environment:
   sdk: ">=3.3.1 <4.0.0"
@@ -27,3 +29,12 @@ dev_dependencies:
   flutter_lints: ^3.0.1
   json_serializable: ^6.7.1
   build_runner: ^2.4.8
+
+# This package supports all platforms listed below.
+platforms:
+  android:
+  ios:
+  linux:
+  macos:
+  web:
+  windows:
