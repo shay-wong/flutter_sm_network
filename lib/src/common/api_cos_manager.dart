@@ -2,18 +2,6 @@ import 'package:cross_file/cross_file.dart';
 import 'package:flutter_sm_logger/sm_logger.dart';
 
 import '../tencent_cos/tencent_cos.dart';
-import 'api_session.dart';
-import 'api_session_map.dart';
-
-class CosAPI extends APISessionMap<CosAPIModel> {
-  @override
-  String get path => '/baseInfo/cosToken';
-
-  @override
-  CosAPIModel toObject(Parameters p) {
-    return CosAPIModel.fromJson(p);
-  }
-}
 
 class CosAPIModel {
   String? tmpSecretId;
@@ -34,10 +22,10 @@ class CosAPIModel {
 }
 
 class CosManager {
-  static const _bucketName = 'box-service-p-1303977104';
-  static const _region = 'ap-hongkong';
-  static const _folderName = 'activity/dynamic';
-  static const _fileName = 'user_avatar';
+  static const _bucketName = '';
+  static const _region = '';
+  static const _folderName = '';
+  static const _fileName = '';
 
   final String tempId;
   final String tempKey;

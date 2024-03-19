@@ -2,7 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:dio_cache_interceptor/dio_cache_interceptor.dart';
 import 'package:flutter_sm_logger/sm_logger.dart';
 
-import '../interceptors/dio_logger.dart';
+import '../interceptors/m_dio_logger.dart';
 import '../responder/api_error.dart';
 import '../responder/api_responder.dart';
 import 'api_env.dart';
@@ -43,22 +43,8 @@ mixin APISession<T> {
 
   /// 默认请求头
   HTTPHeader get _defaultHeaders {
-    HTTPHeader header = {
-      // "version": DeviceService.version,
-      // "locale": DeviceService.isoCode,
-      // "store": DeviceService.storeInfo,
-      // "brand": DeviceService.brand,
-      // "model": DeviceService.model,
-      // "language": DeviceService.language,
-      // "identity": DeviceService.packageName,
-      // "systemVersion": DeviceService.systemVersion,
-      // "Authorization": AuthService.to.token?.requestToken,
-      // "vendorID": DeviceService.vendorId,
-      // "oaid": DeviceService.oaid,
-      // "phone_locale": DeviceService.localeName, //en_US
-      // "phone_language": DeviceService.languageCode, //e
-      // "jPushId": DeviceService.notificationId
-    };
+    // TODO: 默认请求头
+    final HTTPHeader header = {};
 
     return header;
   }
@@ -84,8 +70,9 @@ mixin APISession<T> {
   /// Post 方式默认使用 FormData
   bool get postUseFormData => true;
 
+  // TODO: 统一配置
   /// 跟随主域名后面的前缀
-  String get prefixPath => '/boxdata';
+  String get prefixPath => '';
 
   /// 请求响应处理
   T Function(dynamic json) get responder => (json) => json as T;
@@ -98,6 +85,7 @@ mixin APISession<T> {
 
   /// 是否处理错误
   bool get isHandleErrors => true;
+
   // TODO: 自动弹错误 toast
   bool get isToastErrors => false;
 
@@ -120,7 +108,7 @@ mixin APISession<T> {
     if (kPrintable) {
       // 添加 LogInterceptor 拦截器来自动打印请求、响应日志：
       _dio.interceptors.add(
-        DioLogger(
+        MDioLogger(
           requestHeader: true,
           requestBody: true,
           maxWidth: consoleOutputLength - 2,

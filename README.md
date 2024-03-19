@@ -1,41 +1,51 @@
 # flutter_sm_network
 
-<!--
-This README describes the package. If you publish this package to pub.dev,
-this README's contents appear on the landing page for your package.
 
-For information about how to write a good package README, see the guide for
-[writing package pages](https://dart.dev/guides/libraries/writing-package-pages).
+| [简体中文](README.md) | [English](README.en.md) |
+| ------------------ | ----------------------- |
 
-For general information about developing packages, see the Dart guide for
-[creating packages](https://dart.dev/guides/libraries/create-library-packages)
-and the Flutter guide for
-[developing packages and plugins](https://flutter.dev/developing-packages).
--->
+一个 Flutter 网络请求库，提供了一些常用的功能：
 
-TODO: Put a short description of the package here that helps potential users
-know whether this package might be useful for them.
+- 📱 支持 Dio 网络请求
+- 📦 支持 Json 解析
+- 🎉 支持打印日志到控制台
+- 💥 支持打印错误信息到控制台
+- *(剩余功能还在开发中...)*
 
-## Features
 
-TODO: List what your package can do. Maybe include images, gifs, or videos.
+## 特性
 
-## Getting started
+- [x] <span style="color: lightgreen;">支持 Dio 网络请求</span>
+- [x] <span style="color: lightgreen;">支持 Json 解析</span>
+- [x] <span style="color: lightgreen;">支持打印日志到控制台</span>
+- [x] <span style="color: lightgreen;">支持打印错误信息到控制台</span>
+- [ ] <span style="color: #A9A9A9;">初始配置</span>
+- [ ] <span style="color: #A9A9A9;">支持日志写入文件缓存</span>
 
-TODO: List prerequisites and provide or point to information on how to
-start using the package.
+## 安装
 
-## Usage
+运行下面的命令:
 
-TODO: Include short and useful examples for package users. Add longer examples
-to `/example` folder.
+Dart:
 
-```dart
-const like = 'sample';
+```
+dart pub add flutter_sm_network
 ```
 
-## Additional information
+Flutter:
 
-TODO: Tell users more about the package: where to find more information, how to
-contribute to the package, how to file issues, what response they can expect
-from the package authors, and more.
+```
+flutter pub add flutter_sm_network
+```
+
+或者在 `pubspec.yaml` 文件中添加依赖并运行`dart pub get`：
+
+```
+dependencies:
+  flutter_sm_network: ^0.0.1
+```
+
+## 使用
+```
+补充中...
+```

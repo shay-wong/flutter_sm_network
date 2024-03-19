@@ -4,8 +4,8 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart';
 
 /*修改自 PetterDioLogger*/
-class DioLogger extends Interceptor {
-  DioLogger({
+class MDioLogger extends Interceptor {
+  MDioLogger({
     this.request = true,
     this.requestHeader = false,
     this.requestBody = false,
