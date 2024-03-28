@@ -38,5 +38,6 @@ class BaseModel<T> extends APIResponder<T> {
   }
 
   @override
-  String toString() => 'BaseModel(serviceInfo: $serviceInfo)super=>${super.toString()}';
+  String toString() =>
+      'BaseModel(serviceInfo: $serviceInfo)super=>${super.toString()}';
 }

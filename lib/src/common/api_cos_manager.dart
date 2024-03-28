@@ -4,10 +4,6 @@ import 'package:flutter_sm_logger/sm_logger.dart';
 import '../tencent_cos/tencent_cos.dart';
 
 class CosAPIModel {
-  String? tmpSecretId;
-  String? tmpSecretKey;
-  String? sessionToken;
-
   CosAPIModel({this.tmpSecretId, this.tmpSecretKey, this.sessionToken});
 
   CosAPIModel.fromJson(Map<String, dynamic> json) {
@@ -16,28 +12,38 @@ class CosAPIModel {
     sessionToken = json['sessionToken'];
   }
 
+  String? sessionToken;
+  String? tmpSecretId;
+  String? tmpSecretKey;
+
   bool get isAvailable {
-    return tmpSecretId?.isNotEmpty == true && tmpSecretKey?.isNotEmpty == true && sessionToken?.isNotEmpty == true;
+    return tmpSecretId?.isNotEmpty == true &&
+        tmpSecretKey?.isNotEmpty == true &&
+        sessionToken?.isNotEmpty == true;
   }
 }
 
 class CosManager {
+  CosManager(
+      {required this.tempId, required this.tempKey, required this.token});
+
   static const _bucketName = '';
-  static const _region = '';
-  static const _folderName = '';
   static const _fileName = '';
+  static const _folderName = '';
+  static const _region = '';
 
   final String tempId;
   final String tempKey;
   final String token;
 
-  CosManager({required this.tempId, required this.tempKey, required this.token});
-
-  Future<String?> uploadImage(XFile file, {String folder = _folderName, String fileName = _fileName}) async {
+  Future<String?> uploadImage(XFile file,
+      {String folder = _folderName, String fileName = _fileName}) async {
     final imageData = await file.readAsBytes();
     final imageType = file.name.split('.').last;
-    logger.d('[🐧🐧🐧 CosManager] 🏞️ ⬆️ ${file.toString()} name = ${file.name}');
-    final fileName_ = '${fileName}_${DateTime.now().millisecondsSinceEpoch}-${file.name}';
+    logger
+        .d('[🐧🐧🐧 CosManager] 🏞️ ⬆️ ${file.toString()} name = ${file.name}');
+    final fileName_ =
+        '${fileName}_${DateTime.now().millisecondsSinceEpoch}-${file.name}';
     final cosPath = await COSClient(
       COSConfig(
         tempId,
@@ -57,7 +63,8 @@ class CosManager {
     return cosPath;
   }
 
-  Future<List<String>> uploadImages(List<XFile> files, [String folder = _folderName]) async {
+  Future<List<String>> uploadImages(List<XFile> files,
+      [String folder = _folderName]) async {
     List<String> pathList = [];
     for (final file in files) {
       final filePath = await uploadImage(file, folder: folder);

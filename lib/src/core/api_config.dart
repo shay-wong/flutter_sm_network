@@ -155,8 +155,10 @@ class APIConfig {
       baseUrl: baseUrl ?? this.baseUrl,
       connectTimeout: connectTimeout ?? this.connectTimeout,
       contentType: contentType ?? this.contentType,
-      ensureNonNullHeadersFields: ensureNonNullHeadersFields ?? this.ensureNonNullHeadersFields,
-      ensureNonNullParametersFields: ensureNonNullParametersFields ?? this.ensureNonNullParametersFields,
+      ensureNonNullHeadersFields:
+          ensureNonNullHeadersFields ?? this.ensureNonNullHeadersFields,
+      ensureNonNullParametersFields:
+          ensureNonNullParametersFields ?? this.ensureNonNullParametersFields,
       extra: extra ?? this.extra,
       followRedirects: followRedirects ?? this.followRedirects,
       headers: headers ?? this.headers,
@@ -170,7 +172,8 @@ class APIConfig {
       prefixPath: prefixPath ?? this.prefixPath,
       preserveHeaderCase: preserveHeaderCase ?? this.preserveHeaderCase,
       queryParameters: queryParameters ?? this.queryParameters,
-      receiveDataWhenStatusError: receiveDataWhenStatusError ?? this.receiveDataWhenStatusError,
+      receiveDataWhenStatusError:
+          receiveDataWhenStatusError ?? this.receiveDataWhenStatusError,
       receiveTimeout: receiveTimeout ?? this.receiveTimeout,
       requestEncoder: requestEncoder ?? this.requestEncoder,
       responseDecoder: responseDecoder ?? this.responseDecoder,
@@ -183,10 +186,12 @@ class APIConfig {
 }
 
 class APIEnv {
-  static const baseUrl = String.fromEnvironment('API_BASE_URL', defaultValue: "");
+  static const baseUrl =
+      String.fromEnvironment('API_BASE_URL', defaultValue: "");
 
   /// 根据 enum index
-  static const _envi = int.fromEnvironment('APP_API_ENV', defaultValue: kDebugMode ? 1 : 0);
+  static const _envi =
+      int.fromEnvironment('APP_API_ENV', defaultValue: kDebugMode ? 1 : 0);
 
   static APIEnvType get env => APIEnvType.values[_envi];
 }

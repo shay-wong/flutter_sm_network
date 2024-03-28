@@ -51,7 +51,8 @@ class APIPageableLoader {
   }
 }
 
-abstract class APIPageableSession<T> with APIOptions<T>, APIDioMixin<T, APIResponder<T>> {
+abstract class APIPageableSession<T>
+    with APIOptions<T>, APIDioMixin<T, APIResponder<T>> {
   // NOTE: 如果 loader 传的是空属性不能使用刷新控件,但是可以分页请求.
   APIPageableSession({
     required APIPageableLoader? loader,
@@ -103,5 +104,5 @@ abstract class APIPageableSession<T> with APIOptions<T>, APIDioMixin<T, APIRespo
   }
 }
 
-
-abstract class APISession<T> with APIOptions<T>, APIDioMixin<T, APIResponder<T>> {}
+abstract class APISession<T>
+    with APIOptions<T>, APIDioMixin<T, APIResponder<T>> {}

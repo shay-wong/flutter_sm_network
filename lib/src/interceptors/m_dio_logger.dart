@@ -63,7 +63,8 @@ class MDioLogger extends Interceptor {
       if (err.type == DioExceptionType.badResponse) {
         final uri = err.response?.requestOptions.uri;
         _printBoxed(
-            header: 'DioError ║ Status: ${err.response?.statusCode} ${err.response?.statusMessage}',
+            header:
+                'DioError ║ Status: ${err.response?.statusCode} ${err.response?.statusMessage}',
             text: uri.toString());
         if (err.response != null && err.response?.data != null) {
           logs.add('╔ ${err.type.toString()}');
@@ -121,7 +122,8 @@ class MDioLogger extends Interceptor {
     _printResponseHeader(response);
     if (responseHeader) {
       final responseHeaders = <String, String>{};
-      response.headers.forEach((k, list) => responseHeaders[k] = list.toString());
+      response.headers
+          .forEach((k, list) => responseHeaders[k] = list.toString());
       _printMapAsTable(responseHeaders, header: 'Headers');
     }
 
@@ -143,7 +145,10 @@ class MDioLogger extends Interceptor {
   }
 
   bool _canFlattenMap(Map map) {
-    return map.values.where((dynamic val) => val is Map || val is List).isEmpty && map.toString().length < maxWidth;
+    return map.values
+            .where((dynamic val) => val is Map || val is List)
+            .isEmpty &&
+        map.toString().length < maxWidth;
   }
 
   String _flattenList(List list) {
@@ -192,7 +197,8 @@ class MDioLogger extends Interceptor {
 
   String _indent([int tabCount = kInitialTab]) => tabStep * tabCount;
 
-  Map<String, dynamic> _mergeListToMap(List<MapEntry<String, dynamic>> inputList) {
+  Map<String, dynamic> _mergeListToMap(
+      List<MapEntry<String, dynamic>> inputList) {
     return inputList.fold({}, (Map<String, dynamic> result, entry) {
       final key = entry.key;
       final value = entry.value;
@@ -214,7 +220,9 @@ class MDioLogger extends Interceptor {
   void _printBlock(String msg) {
     final lines = (msg.length / maxWidth).ceil();
     for (var i = 0; i < lines; ++i) {
-      logs.add((i >= 0 ? '║ ' : '') + msg.substring(i * maxWidth, math.min<int>(i * maxWidth + maxWidth, msg.length)));
+      logs.add((i >= 0 ? '║ ' : '') +
+          msg.substring(i * maxWidth,
+              math.min<int>(i * maxWidth + maxWidth, msg.length)));
     }
   }
 
@@ -236,7 +244,8 @@ class MDioLogger extends Interceptor {
     // }
   }
 
-  void _printLine([String pre = '', String suf = '╝']) => logs.add('$pre${'═' * (maxWidth - pre.length)}$suf');
+  void _printLine([String pre = '', String suf = '╝']) =>
+      logs.add('$pre${'═' * (maxWidth - pre.length)}$suf');
 
   void _printList(List list, {int tabs = kInitialTab}) {
     list.asMap().forEach((i, dynamic e) {
@@ -248,7 +257,8 @@ class MDioLogger extends Interceptor {
         if (compact && _canFlattenMap(e)) {
           logs.add('${_indent(tabs)}  ${_flattenMap(e)}${!isLast ? ',' : ''}');
         } else {
-          _printPrettyMap(e, initialTab: tabs + 1, isListItem: true, isLast: isLast);
+          _printPrettyMap(e,
+              initialTab: tabs + 1, isListItem: true, isLast: isLast);
         }
       } else if (e is List) {
         if (compact && _canFlattenList(e)) {
@@ -267,7 +277,8 @@ class MDioLogger extends Interceptor {
   void _printMapAsTable(Map? map, {String? header}) {
     if (map == null || map.isEmpty) return;
     logs.add('╔ $header ');
-    map.forEach((dynamic key, dynamic value) => _printKV(key.toString(), value));
+    map.forEach(
+        (dynamic key, dynamic value) => _printKV(key.toString(), value));
     _printLine('╚');
   }
 
@@ -294,14 +305,16 @@ class MDioLogger extends Interceptor {
       }
       if (value is Map) {
         if (compact && _canFlattenMap(value)) {
-          logs.add('${_indent(tabs)} "$key": ${_flattenMap(value)}${!isLast ? ',' : ''}');
+          logs.add(
+              '${_indent(tabs)} "$key": ${_flattenMap(value)}${!isLast ? ',' : ''}');
         } else {
           logs.add('${_indent(tabs)} "$key": {');
           _printPrettyMap(value, initialTab: tabs);
         }
       } else if (value is List) {
         if (compact && _canFlattenList(value)) {
-          logs.add('${_indent(tabs)} "$key": ${_flattenList(value)}${!isLast ? ',' : ''}');
+          logs.add(
+              '${_indent(tabs)} "$key": ${_flattenList(value)}${!isLast ? ',' : ''}');
         } else {
           logs.add('${_indent(tabs)} "$key": [');
           _printList(value, tabs: tabs);
@@ -355,14 +368,17 @@ class MDioLogger extends Interceptor {
     final uri = response.requestOptions.uri;
     final method = response.requestOptions.method;
     _printBoxed(
-        header: 'Response ║ $method ║ Status: ${response.statusCode} ${response.statusMessage}', text: uri.toString());
+        header:
+            'Response ║ $method ║ Status: ${response.statusCode} ${response.statusMessage}',
+        text: uri.toString());
   }
 
   void _printUint8List(Uint8List list, {int tabs = kInitialTab}) {
     var chunks = [];
     for (var i = 0; i < list.length; i += chunkSize) {
       chunks.add(
-        list.sublist(i, i + chunkSize > list.length ? list.length : i + chunkSize),
+        list.sublist(
+            i, i + chunkSize > list.length ? list.length : i + chunkSize),
       );
     }
     for (var element in chunks) {

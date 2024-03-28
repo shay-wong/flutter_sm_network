@@ -1,51 +1,52 @@
 # flutter_sm_network
 
+| [English](README.md) | [简体中文](README.zh.md) |
+| ------------------------------- | ----------------------- |
 
-| [简体中文](README.md) | [English](README.en.md) |
-| ------------------ | ----------------------- |
+A Flutter networking library that provides several commonly used features:
 
-一个 Flutter 网络请求库，提供了一些常用的功能：
+- 📱 Supports Dio network requests
+- 📦 Supports JSON parsing
+- 🎉 Supports printing logs to the console
+- 💥 Supports printing error information to the console
+- *(Remaining features are still under development...)*
 
-- 📱 支持 Dio 网络请求
-- 📦 支持 Json 解析
-- 🎉 支持打印日志到控制台
-- 💥 支持打印错误信息到控制台
-- *(剩余功能还在开发中...)*
+## Features
 
+- [x] <span style="color: lightgreen;">Supports Dio network requests</span>
+- [x] <span style="color: lightgreen;">Supports JSON parsing</span>
+- [x] <span style="color: lightgreen;">Supports printing logs to the console</span>
+- [x] <span style="color: lightgreen;">Supports printing error information to the console</span>
+- [ ] <span style="color: #A9A9A9;">Initial configuration</span>
+- [ ] <span style="color: #A9A9A9;">Supports log writing to file cache</span>
 
-## 特性
+## Installing
 
-- [x] <span style="color: lightgreen;">支持 Dio 网络请求</span>
-- [x] <span style="color: lightgreen;">支持 Json 解析</span>
-- [x] <span style="color: lightgreen;">支持打印日志到控制台</span>
-- [x] <span style="color: lightgreen;">支持打印错误信息到控制台</span>
-- [ ] <span style="color: #A9A9A9;">初始配置</span>
-- [ ] <span style="color: #A9A9A9;">支持日志写入文件缓存</span>
+Depend on it
 
-## 安装
+Run this command:
 
-运行下面的命令:
-
-Dart:
+With Dart:
 
 ```
 dart pub add flutter_sm_network
 ```
 
-Flutter:
+With Flutter:
 
 ```
 flutter pub add flutter_sm_network
 ```
 
-或者在 `pubspec.yaml` 文件中添加依赖并运行`dart pub get`：
+Or add the dependency to your `pubspec.yaml` file and run `dart pub get`:
 
 ```
 dependencies:
   flutter_sm_network: ^0.0.1
 ```
 
-## 使用
+## Usage
+
 ```
-补充中...
+Supplementing...
 ```

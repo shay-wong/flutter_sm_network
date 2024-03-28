@@ -15,7 +15,9 @@ class COSClientBase {
 
   ///生成签名
   String getSign(String method, String key,
-      {Map<String, String?> headers = const {}, Map<String, String?> params = const {}, DateTime? signTime}) {
+      {Map<String, String?> headers = const {},
+      Map<String, String?> params = const {},
+      DateTime? signTime}) {
     if (_config.anonymous) {
       return "";
     } else {
@@ -39,9 +41,11 @@ class COSClientBase {
       cosLog("headerList=$headerList");
       cosLog("httpHeaders=$httpHeaders");
 
-      String httpString = "${method.toLowerCase()}\n$key\n$httpParameters\n$httpHeaders\n";
+      String httpString =
+          "${method.toLowerCase()}\n$key\n$httpParameters\n$httpHeaders\n";
       cosLog("httpString=$httpString");
-      String stringToSign = "sha1\n$keyTime\n${hex.encode(sha1.convert(httpString.codeUnits).bytes)}\n";
+      String stringToSign =
+          "sha1\n$keyTime\n${hex.encode(sha1.convert(httpString.codeUnits).bytes)}\n";
       cosLog("stringToSign=$stringToSign");
       String signature = hmacSha1(stringToSign, signKey);
       cosLog("signature=$signature");
@@ -77,8 +81,9 @@ class COSClientBase {
 
   ///处理请求头和参数列表
   List<String> getListAndParameters(Map<String, String?> params) {
-    params =
-        params.map((key, value) => MapEntry(Uri.encodeComponent(key).toLowerCase(), Uri.encodeComponent(value ?? "")));
+    params = params.map((key, value) => MapEntry(
+        Uri.encodeComponent(key).toLowerCase(),
+        Uri.encodeComponent(value ?? "")));
 
     var keys = params.keys.toList();
     keys.sort();
@@ -93,8 +98,11 @@ class COSClientBase {
   }
 
   Future<HttpClientRequest> getRequest(String method, String action,
-      {Map<String, String?> params = const {}, Map<String, String?> headers = const {}, String? token}) async {
-    String urlParams = params.keys.toList().map((e) => "$e=${params[e] ?? ""}").join("&");
+      {Map<String, String?> params = const {},
+      Map<String, String?> headers = const {},
+      String? token}) async {
+    String urlParams =
+        params.keys.toList().map((e) => "$e=${params[e] ?? ""}").join("&");
     if (urlParams.isNotEmpty) {
       urlParams = "?$urlParams";
     }
@@ -104,7 +112,8 @@ class COSClientBase {
       action = "/$action";
     }
 
-    var req = await client.openUrl(method, Uri.parse("${_config.uri}$action$urlParams"));
+    var req = await client.openUrl(
+        method, Uri.parse("${_config.uri}$action$urlParams"));
 
     headers.forEach((key, value) {
       req.headers.add(key, value ?? "");
@@ -122,8 +131,10 @@ class COSClientBase {
   }
 
   Future<HttpClientResponse> getResponse(String method, String action,
-      {Map<String, String?> params = const {}, Map<String, String?> headers = const {}}) async {
-    var req = await getRequest(method, action, params: params, headers: headers);
+      {Map<String, String?> params = const {},
+      Map<String, String?> headers = const {}}) async {
+    var req =
+        await getRequest(method, action, params: params, headers: headers);
     var res = await req.close();
     return res;
   }
@@ -137,7 +148,8 @@ class COSClientBase {
     String? token,
   }) {
     final dio = Dio();
-    String urlParams = params.keys.toList().map((e) => "$e=${params[e] ?? ""}").join("&");
+    String urlParams =
+        params.keys.toList().map((e) => "$e=${params[e] ?? ""}").join("&");
     if (urlParams.isNotEmpty) {
       urlParams = "?$urlParams";
     }
@@ -155,6 +167,7 @@ class COSClientBase {
     // 请求配置
     final options = Options(method: method.name, headers: headers);
 
-    return dio.requestUri(Uri.parse("${_config.uri}$action$urlParams"), data: data, options: options);
+    return dio.requestUri(Uri.parse("${_config.uri}$action$urlParams"),
+        data: data, options: options);
   }
 }

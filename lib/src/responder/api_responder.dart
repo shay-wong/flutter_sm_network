@@ -21,7 +21,8 @@ class _APIBaseModel<T> extends APIResponder<T> {
     List<T>? dataList;
     final temp = json['data'];
     if (temp is List) {
-      dataList = temp.map((e) => fromJsonT != null ? fromJsonT(e) : e as T).toList();
+      dataList =
+          temp.map((e) => fromJsonT != null ? fromJsonT(e) : e as T).toList();
     } else {
       data = fromJsonT != null ? fromJsonT(temp) : temp;
     }
@@ -44,7 +45,9 @@ class _APIBaseModel<T> extends APIResponder<T> {
     return <String, dynamic>{
       'code': code,
       'data': toJsonT != null ? toJsonT(data) : data,
-      'dataList': toJsonT != null ? dataList?.map((e) => toJsonT(e)).toList() : dataList,
+      'dataList': toJsonT != null
+          ? dataList?.map((e) => toJsonT(e)).toList()
+          : dataList,
       'extra': extra,
       'message': message,
       'success': success,

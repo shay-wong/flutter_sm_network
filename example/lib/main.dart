@@ -1,4 +1,5 @@
 import 'package:example/api.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sm_network/sm_network.dart';
 
@@ -31,7 +32,9 @@ class _MyAppState extends State<MyApp> {
 
   load() async {
     final bing = await BingAPI().fetchList();
-    print(bing);
+    if (kDebugMode) {
+      print(bing);
+    }
   }
 
   @override

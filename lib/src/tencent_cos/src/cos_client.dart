@@ -29,7 +29,12 @@ class COSClient extends COSClientBase {
     cosLog("putObject");
     int fileLength = fileData.length;
     var response = await request(HTTPMethod.PUT, objectKey,
-        data: fileData, headers: {"content-type": contentType, "content-length": fileLength.toString()}, token: token);
+        data: fileData,
+        headers: {
+          "content-type": contentType,
+          "content-length": fileLength.toString()
+        },
+        token: token);
     // var req = await getRequest("PUT", objectKey,
     //     headers: {"content-type": contentType, "content-length": fileLength.toString()}, token: token);
     // req.add(fileData);
@@ -51,7 +56,11 @@ class COSClient extends COSClientBase {
     var f = File(filePath);
     int flength = await f.length();
     var req = await getRequest("PUT", objectKey,
-        headers: {"content-type": contentType, "content-length": flength.toString()}, token: token);
+        headers: {
+          "content-type": contentType,
+          "content-length": flength.toString()
+        },
+        token: token);
     var fs = f.openRead();
     await req.addStream(fs);
     var response = await req.close();

@@ -1,9 +1,9 @@
 name: flutter_sm_network
-description: "A Flutter networking library."
-version: 0.0.2
-homepage: "https://github.com/shay-wong/flutter_sm_models"
-repository: "https://github.com/shay-wong/flutter_sm_models"
-issue_tracker: "https://github.com/shay-wong/flutter_sm_models/issues"
+description: "A Flutter networking library that provides a simple and convenient way to access network resources."
+version: 0.0.3
+homepage: "https://github.com/shay-wong/flutter_sm_network"
+repository: "https://github.com/shay-wong/flutter_sm_network"
+issue_tracker: "https://github.com/shay-wong/flutter_sm_network/issues"
 
 environment:
   sdk: ">=3.3.1 <4.0.0"

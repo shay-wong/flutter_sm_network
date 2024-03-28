@@ -16,7 +16,8 @@ class APIError extends MError {
     super.message,
   });
 
-  factory APIError.fromJson(Map<String, dynamic> json) => _$APIErrorFromJson(json);
+  factory APIError.fromJson(Map<String, dynamic> json) =>
+      _$APIErrorFromJson(json);
 
   @override
   Map<String, dynamic> toJson() => _$APIErrorToJson(this);
