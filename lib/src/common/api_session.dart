@@ -1,176 +1,107 @@
-import 'package:dio/dio.dart';
-import 'package:dio_cache_interceptor/dio_cache_interceptor.dart';
-import 'package:flutter_sm_logger/sm_logger.dart';
+import 'package:flutter/foundation.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 
-import '../interceptors/m_dio_logger.dart';
+import '../core/api_config.dart';
 import '../responder/api_error.dart';
 import '../responder/api_responder.dart';
-import 'api_env.dart';
+import 'api_mixin.dart';
 
-enum HTTPMethod {
-  connect('CONNECT'),
-  delete('DELETE'),
-  get('GET'),
-  head('HEAD'),
-  options('OPTIONS'),
-  patch('PATCH'),
-  post('POST'),
-  put('PUT'),
-  query('QUERY'),
-  trace('TRACE');
+class APIPageableLoader {
+  APIPageableLoader({
+    this.pageNum = 1,
+    this.pageSize = 10,
+    bool initialRefresh = false,
+    RefreshStatus? initialRefreshStatus,
+    LoadStatus? initialLoadStatus,
+  })  : _firstPage = pageNum,
+        controller = RefreshController(
+          initialRefresh: initialRefresh,
+          initialRefreshStatus: initialRefreshStatus,
+          initialLoadStatus: initialLoadStatus,
+        );
 
-  const HTTPMethod(this.value);
+  final RefreshController controller;
 
-  final String value;
-}
+  // 第几页
+  int pageNum;
 
-typedef Parameters = Map<String, dynamic>;
-typedef HTTPHeader = Map<String, dynamic>;
+  // 每页大小
+  final int pageSize;
 
-mixin APISession<T> {
-  /// dio 对象
-  late final Dio _dio = Dio(
-    BaseOptions(
-      baseUrl: _baseUrl,
-      connectTimeout: timeoutInterval,
-      receiveTimeout: timeoutInterval,
-      headers: _defaultHeaders,
-    ),
-  );
+  // 第一页
+  final int _firstPage;
 
-  /// 基础 url
-  String get _baseUrl => APIEnv.apiBaseUrl;
+  // 是否是刷新
+  bool _isRefresh = true;
 
-  /// 默认请求头
-  HTTPHeader get _defaultHeaders {
-    // TODO: 默认请求头
-    final HTTPHeader header = {};
+  bool get isRefresh => _isRefresh;
 
-    return header;
+  set isRefresh(bool ref) {
+    _isRefresh = ref;
+    if (_isRefresh) {
+      pageNum = _firstPage;
+      controller.resetNoData();
+    } else {
+      pageNum++;
+    }
   }
 
-  /// 请求头 默认 null
-  HTTPHeader? get headers => null;
+  void dispose() {
+    controller.dispose();
+  }
+}
 
-  /// 确保 Headers 字段不为空
-  bool get isEnsureNonNullHeadersFields => true;
+abstract class APIPageableSession<T> with APIOptions<T>, APIDioMixin<T, APIResponder<T>> {
+  // NOTE: 如果 loader 传的是空属性不能使用刷新控件,但是可以分页请求.
+  APIPageableSession({
+    required APIPageableLoader? loader,
+  }) : loader = loader ?? APIPageableLoader();
 
-  /// 确保 Parameters 字段不为空
-  bool get isEnsureNonNullParametersFields => true;
+  final APIPageableLoader loader;
 
-  /// 请求方式 默认 post
-  HTTPMethod get method => HTTPMethod.post;
+  @override
+  @mustCallSuper
+  Parameters get parameters => {
+        'pageNum': loader.pageNum,
+        'pageSize': loader.pageSize,
+      };
 
-  /// 请求参数 默认 null
-  Parameters? get parameters => null;
-
-  /// 请求路径 默认 null
-  String? get path => null;
-
-  /// Post 方式默认使用 FormData
-  bool get postUseFormData => true;
-
-  // TODO: 统一配置
-  /// 跟随主域名后面的前缀
-  String get prefixPath => '';
-
-  /// 请求响应处理
-  T Function(dynamic json) get responder => (json) => json as T;
-
-  /// 请求超时时间
-  Duration get timeoutInterval => const Duration(seconds: 30);
-
-  /// 请求 url
-  String get url => _baseUrl + prefixPath + (path ?? '');
-
-  /// 是否处理错误
-  bool get isHandleErrors => true;
-
-  // TODO: 自动弹错误 toast
-  bool get isToastErrors => false;
-
+  @override
   Future<APIResponder<T>> request({bool isCached = true}) async {
-    final finalHeaders = {..._defaultHeaders, ...?headers};
-    if (isEnsureNonNullHeadersFields) finalHeaders.removeWhere((key, value) => value == null);
-    // 请求配置
-    final options = Options(method: method.value, headers: finalHeaders);
-    // 添加 DioCacheInterceptor 拦截器实现接口缓存：
-    if (isCached) {
-      // OPTIMIZE: 自定义接口缓存
-      final cacheInterceptors = DioCacheInterceptor(
-        options: CacheOptions(
-          store: MemCacheStore(),
-        ),
-      );
-      _dio.interceptors.add(cacheInterceptors);
-    }
-
-    if (kPrintable) {
-      // 添加 LogInterceptor 拦截器来自动打印请求、响应日志：
-      _dio.interceptors.add(
-        MDioLogger(
-          requestHeader: true,
-          requestBody: true,
-          maxWidth: consoleOutputLength - 2,
-        ),
-      );
-    }
-
-    // 网络请求
-    try {
-      Object? data;
-      Parameters? queryParameters = parameters;
-
-      if (isEnsureNonNullParametersFields) {
-        queryParameters?.removeWhere((key, value) => value == null);
+    return super.request(isCached: isCached).then(
+      (value) {
+        if (value.isSuccess) {
+          loader.controller.refreshCompleted();
+          (value.dataList?.length ?? 0) < loader.pageSize
+              ? loader.controller.loadNoData()
+              : loader.controller.loadComplete();
+        } else {
+          loader.controller.loadFailed();
+          if (!loader.isRefresh) {
+            loader.pageNum--;
+          }
+        }
+        return value;
+      },
+    ).onError((error, stackTrace) {
+      loader.controller.refreshFailed();
+      if (!loader.isRefresh) {
+        loader.pageNum--;
       }
-
-      if (method == HTTPMethod.post && postUseFormData && queryParameters != null) {
-        data = FormData.fromMap(queryParameters);
-        queryParameters = null;
-      }
-
-      Response response = await _dio.request(
-        prefixPath + (path ?? ''),
-        data: data,
-        queryParameters: queryParameters,
-        options: options,
-      );
-      final res = APIResponder.fromJson(response.data, responder);
-      if (res.isSuccess || !isHandleErrors) {
-        return res;
-      }
-      return Future.error(
-        res.error ??
-            APIError(
-              code: -1,
-              message: '接口请求错误',
-            ),
-      );
-    } on DioException catch (e) {
-      logger.e('$e \n $path');
-      if (e.type == DioExceptionType.badResponse && e.response?.statusCode == 503) {
-        return Future.error(APIError(code: e.response?.statusCode, message: '服务正在重启, 请稍后再试'));
-      }
-      final response = APIResponder.fromJson(e.response?.data, responder);
-      return Future.error(
-        response.error?.copyWith(
-              code: e.response?.statusCode,
-              message: e.response?.statusMessage,
-            ) ??
-            APIError(
-              code: e.response?.statusCode,
-              message: e.response?.statusMessage ?? '接口请求错误',
-            ),
-      );
-    } on Error catch (e) {
-      logger.e('$e \n $path');
-      return Future.error(e);
-    }
+      return Future.error(error ?? APIError.error());
+    });
   }
 
-  /// 根据 responder 自动解析成对应的 model 并返回
-  Future<T?> send() async {
-    return request().then((value) => value.data);
+  Future<List<T>?> refresh({bool isCached = true}) {
+    loader.isRefresh = true;
+    return super.fetchList(isCached: isCached);
+  }
+
+  Future<List<T>?> load({bool isCached = true}) {
+    loader.isRefresh = false;
+    return super.fetchList(isCached: isCached);
   }
 }
+
+
+abstract class APISession<T> with APIOptions<T>, APIDioMixin<T, APIResponder<T>> {}

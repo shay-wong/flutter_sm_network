@@ -1,4 +1,5 @@
-/// 修改自 flutter_tencent_cos
+/// 修改自 tencent_cos
+/// https://pub.dev/packages/tencent_cos
 library flutter_tencent_cos;
 
 export 'src/cos_client.dart';

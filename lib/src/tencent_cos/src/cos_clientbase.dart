@@ -4,7 +4,7 @@ import 'package:convert/convert.dart';
 import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
 
-import '../../common/api_session.dart';
+import '../../core/api_config.dart';
 import 'cos_comm.dart';
 import 'cos_config.dart';
 
@@ -146,14 +146,14 @@ class COSClientBase {
       action = "/$action";
     }
 
-    var sighn = getSign(method.value, action, params: params, headers: headers);
+    var sighn = getSign(method.name, action, params: params, headers: headers);
     headers['Authorization'] = sighn;
     if (token != null) {
       headers["x-cos-security-token"] = token;
     }
 
     // 请求配置
-    final options = Options(method: method.value, headers: headers);
+    final options = Options(method: method.name, headers: headers);
 
     return dio.requestUri(Uri.parse("${_config.uri}$action$urlParams"), data: data, options: options);
   }

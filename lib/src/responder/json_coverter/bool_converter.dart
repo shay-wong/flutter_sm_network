@@ -5,7 +5,7 @@ class BoolConverter implements JsonConverter<bool, int> {
 
   @override
   bool fromJson(int json) {
-    return json == 0 ? false : true;
+    return json > 0 ? true : false;
   }
 
   @override

@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:xml/xml.dart';
 
-import '../../common/api_session.dart';
+import '../../core/api_config.dart';
 import 'cos_clientbase.dart';
 import 'cos_comm.dart';
 import 'cos_exception.dart';
@@ -28,7 +28,7 @@ class COSClient extends COSClientBase {
       {String? token, String? contentType = "image/jpeg"}) async {
     cosLog("putObject");
     int fileLength = fileData.length;
-    var response = await request(HTTPMethod.put, objectKey,
+    var response = await request(HTTPMethod.PUT, objectKey,
         data: fileData, headers: {"content-type": contentType, "content-length": fileLength.toString()}, token: token);
     // var req = await getRequest("PUT", objectKey,
     //     headers: {"content-type": contentType, "content-length": fileLength.toString()}, token: token);
