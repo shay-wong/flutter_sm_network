@@ -22,9 +22,9 @@ class _APIBaseModel<T> extends APIResponder<T> {
     final temp = json['data'];
     if (temp is List) {
       dataList =
-          temp.map((e) => fromJsonT != null ? fromJsonT(e) : e as T).toList();
+          temp.map((e) => fromJsonT != null && e != null ? fromJsonT(e) : e as T).toList();
     } else {
-      data = fromJsonT != null ? fromJsonT(temp) : temp;
+      data = fromJsonT != null && temp != null ? fromJsonT(temp) : temp as T?;
     }
     return _APIBaseModel<T>(
       code: json['code'] as int?,

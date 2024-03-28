@@ -55,6 +55,9 @@ mixin APIDioMixin<T, E extends APIResponder<T>> on APIOptions<T> {
           requestHeader: true,
           requestBody: true,
           maxWidth: consoleOutputLength - 2,
+            logPrint: (object) {
+              logger.p(object);
+            }
         ),
       );
     }
