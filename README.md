@@ -1,4 +1,4 @@
-# flutter_sm_network
+# sm_network
 
 | [English](README.md) | [简体中文](README.zh.md) |
 | ------------------------------- | ----------------------- |
@@ -29,20 +29,20 @@ Run this command:
 With Dart:
 
 ```
-dart pub add flutter_sm_network
+dart pub add sm_network
 ```
 
 With Flutter:
 
 ```
-flutter pub add flutter_sm_network
+flutter pub add sm_network
 ```
 
 Or add the dependency to your `pubspec.yaml` file and run `dart pub get`:
 
 ```
 dependencies:
-  flutter_sm_network: ^0.0.1
+  sm_network: ^0.0.1
 ```
 
 ## Usage

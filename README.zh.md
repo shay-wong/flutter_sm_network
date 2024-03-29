@@ -1,4 +1,4 @@
-# flutter_sm_network
+# sm_network
 
 
 | [English](README.md) | [简体中文](README.zh.md) |
@@ -29,20 +29,20 @@
 Dart:
 
 ```
-dart pub add flutter_sm_network
+dart pub add sm_network
 ```
 
 Flutter:
 
 ```
-flutter pub add flutter_sm_network
+flutter pub add sm_network
 ```
 
 或者在 `pubspec.yaml` 文件中添加依赖并运行`dart pub get`：
 
 ```
 dependencies:
-  flutter_sm_network: ^0.0.1
+  sm_network: ^0.0.1
 ```
 
 ## 使用
