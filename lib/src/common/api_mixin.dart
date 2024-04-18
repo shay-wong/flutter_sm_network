@@ -12,17 +12,9 @@ import '../responder/api_responder.dart';
 
 mixin APIDioMixin<T, E extends APIResponder<T>> on APIOptions<T> {
   /// dio 对象
-  late final Dio _dio = Dio(_baseOptions);
+  late final Dio _dio = config.dio ?? Dio(_baseOptions);
 
-  /// 根据 responder 自动解析成对应的 model 并返回
-  Future<T?> fetch({bool isCached = true}) async {
-    return request(isCached: isCached).then((value) => value.data);
-  }
-
-  /// 根据 responder 自动解析成对应的 list model 并返回
-  Future<List<T>?> fetchList({bool isCached = true}) async {
-    return request(isCached: isCached).then((value) => value.dataList);
-  }
+  Dio get dio => _dio;
 
   E createResponder(dynamic data) {
     return APIResponder<T>.fromJson(data, (json) => parseJson(json)) as E;
@@ -34,6 +26,16 @@ mixin APIDioMixin<T, E extends APIResponder<T>> on APIOptions<T> {
       data = jsonDecode(data);
     }
     return createResponder(data);
+  }
+
+  /// 根据 responder 自动解析成对应的 model 并返回
+  Future<T?> fetch({bool isCached = true}) async {
+    return request(isCached: isCached).then((value) => value.data);
+  }
+
+  /// 根据 responder 自动解析成对应的 list model 并返回
+  Future<List<T>?> fetchList({bool isCached = true}) async {
+    return request(isCached: isCached).then((value) => value.dataList);
   }
 
   Future<E> request({bool isCached = true}) async {
@@ -52,13 +54,12 @@ mixin APIDioMixin<T, E extends APIResponder<T>> on APIOptions<T> {
       // 添加 LogInterceptor 拦截器来自动打印请求、响应日志：
       _dio.interceptors.add(
         MDioLogger(
-          requestHeader: true,
-          requestBody: true,
-          maxWidth: consoleOutputLength - 2,
+            requestHeader: true,
+            requestBody: true,
+            maxWidth: consoleOutputLength - 2,
             logPrint: (object) {
               logger.p(object);
-            }
-        ),
+            }),
       );
     }
 
@@ -71,7 +72,9 @@ mixin APIDioMixin<T, E extends APIResponder<T>> on APIOptions<T> {
         queryParameters?.removeWhere((key, value) => value == null);
       }
 
-      if (method == HTTPMethod.POST && config.postUseFormData && queryParameters != null) {
+      if (method == HTTPMethod.POST &&
+          config.postUseFormData &&
+          queryParameters != null) {
         data = FormData.fromMap(queryParameters);
         queryParameters = null;
       }
@@ -103,7 +106,8 @@ mixin APIDioMixin<T, E extends APIResponder<T>> on APIOptions<T> {
         return Future.error(e.error ?? APIError.error());
       }
 
-      if (e.type == DioExceptionType.badResponse && e.response?.statusCode == 503) {
+      if (e.type == DioExceptionType.badResponse &&
+          e.response?.statusCode == 503) {
         return Future.error(
           APIError(
             code: e.response?.statusCode,
@@ -115,7 +119,7 @@ mixin APIDioMixin<T, E extends APIResponder<T>> on APIOptions<T> {
       final responder = decodeJson(e.response!.data);
 
       return Future.error(
-        responder.error?.copyWith(
+        responder.error?.mergeWith(
               code: e.response?.statusCode,
               message: e.response?.statusMessage,
             ) ??
@@ -188,7 +192,8 @@ mixin APIOptions<T> {
   Options? get options {
     Parameters? effectiveHeaders = headers;
     if (config.ensureNonNullHeadersFields) {
-      effectiveHeaders = effectiveHeaders?..removeWhere((key, value) => value == null);
+      effectiveHeaders = effectiveHeaders
+        ?..removeWhere((key, value) => value == null);
     }
     // 请求配置
     return Options(

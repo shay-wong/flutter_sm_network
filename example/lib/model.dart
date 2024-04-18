@@ -1,5 +1,7 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
-import 'package:flutter_sm_network/sm_network.dart';
+import 'package:sm_network/sm_network.dart';
+
+part 'model.g.dart';
 
 abstract class APIRequest<T> with APIOptions<T>, APIDioMixin<T, BaseModel<T>> {
   @override
@@ -40,4 +42,30 @@ class BaseModel<T> extends APIResponder<T> {
   @override
   String toString() =>
       'BaseModel(serviceInfo: $serviceInfo)super=>${super.toString()}';
+}
+
+@JsonSerializable()
+class Person extends Object {
+  @JsonKey(name: 'age')
+  num? age;
+
+  @JsonKey(name: 'gender')
+  String? gender;
+
+  @JsonKey(name: 'name')
+  String? name;
+
+  Person(
+    this.age,
+    this.gender,
+    this.name,
+  );
+
+  factory Person.fromJson(Map<String, dynamic> srcJson) =>
+      _$PersonFromJson(srcJson);
+
+  Map<String, dynamic> toJson() => _$PersonToJson(this);
+
+  @override
+  String toString() => 'Person(age: $age, gender: $gender, name: $name)';
 }

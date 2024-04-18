@@ -10,16 +10,18 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_sm_network:
+  sm_network:
     path: ../
   json_annotation: ^4.8.1
-  cupertino_icons: ^1.0.6
+  cupertino_icons: ^1.0.8
 
 dev_dependencies:
-  build_runner: ^2.4.8
+  build_runner: ^2.4.9
   flutter_test:
     sdk: flutter
   flutter_lints: ^3.0.2
   json_serializable: ^6.7.1
+  http_mock_adapter: ^0.6.1
+
 flutter:
   uses-material-design: true

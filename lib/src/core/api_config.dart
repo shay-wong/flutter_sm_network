@@ -17,6 +17,7 @@ typedef ToJsonT<T> = Parameters? Function(T? value);
 /// 默认配置, 在调用 [APISession] 之前, 必须先调用 [APICore.initialize] 才会生效
 class APIConfig {
   APIConfig({
+    this.dio,
     this.baseUrl,
     this.connectTimeout = const Duration(seconds: 60),
     this.contentType,
@@ -44,6 +45,8 @@ class APIConfig {
     this.suffixPath = '',
     this.validateStatus,
   });
+
+  final Dio? dio;
 
   /// 默认 URL
   final String? baseUrl;

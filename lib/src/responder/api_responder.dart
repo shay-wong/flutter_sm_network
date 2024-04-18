@@ -21,10 +21,13 @@ class _APIBaseModel<T> extends APIResponder<T> {
     List<T>? dataList;
     final temp = json['data'];
     if (temp is List) {
-      dataList =
-          temp.map((e) => fromJsonT != null && e != null ? fromJsonT(e) : e as T).toList();
+      dataList = temp
+          .map((e) => fromJsonT != null && e != null ? fromJsonT(e) : e as T)
+          .toList();
+    } else if (temp is Map && fromJsonT != null) {
+      data = fromJsonT(temp);
     } else {
-      data = fromJsonT != null && temp != null ? fromJsonT(temp) : temp as T?;
+      data = temp as T?;
     }
     return _APIBaseModel<T>(
       code: json['code'] as int?,

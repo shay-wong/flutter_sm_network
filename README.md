@@ -28,25 +28,25 @@ Run this command:
 
 With Dart:
 
-```
+``` shell
 dart pub add sm_network
 ```
 
 With Flutter:
 
-```
+``` shell
 flutter pub add sm_network
 ```
 
 Or add the dependency to your `pubspec.yaml` file and run `dart pub get`:
 
-```
+``` yaml
 dependencies:
   sm_network: ^0.0.1
 ```
 
 ## Usage
 
-```
+``` dart
 Supplementing...
 ```

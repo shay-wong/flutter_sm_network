@@ -1,14 +1,14 @@
 import 'package:example/api.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_sm_network/sm_network.dart';
+import 'package:sm_network/sm_network.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
   APICore.initialize(
     APIConfig(
-      baseUrl: 'https://raw.onmicrosoft.cn',
+      baseUrl: 'https://example.com',
     ),
   );
 
@@ -31,9 +31,16 @@ class _MyAppState extends State<MyApp> {
   }
 
   load() async {
-    final bing = await BingAPI().fetchList();
+    final string = await GetStringAPI().fetch();
+    final num = await GetNumAPI().fetch();
+    final person = await GetMapAPI().fetch();
+    final persons = await GetListAPI().fetchList();
+
     if (kDebugMode) {
-      print(bing);
+      print(string);
+      print(num);
+      print(person);
+      print(persons);
     }
   }
 

@@ -32,3 +32,4 @@ doc/api/
 *.iml
 *.ipr
 *.iws
+.markdownlint.json

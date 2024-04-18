@@ -31,4 +31,14 @@ class APIError extends MError {
       message: message ?? this.message,
     );
   }
+
+  APIError mergeWith({
+    int? code,
+    String? message,
+  }) {
+    return APIError(
+      code: this.code ?? code,
+      message: this.message ?? message,
+    );
+  }
 }
