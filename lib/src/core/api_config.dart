@@ -1,8 +1,10 @@
 // ignore_for_file: constant_identifier_names
 
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/painting.dart';
+
+const bool _kDebugMode = !_kReleaseMode && !_kProfileMode;
+const bool _kProfileMode = bool.fromEnvironment('dart.vm.profile');
+const bool _kReleaseMode = bool.fromEnvironment('dart.vm.product');
 
 typedef FromJsonT<T> = T Function(dynamic json);
 
@@ -158,10 +160,8 @@ class APIConfig {
       baseUrl: baseUrl ?? this.baseUrl,
       connectTimeout: connectTimeout ?? this.connectTimeout,
       contentType: contentType ?? this.contentType,
-      ensureNonNullHeadersFields:
-          ensureNonNullHeadersFields ?? this.ensureNonNullHeadersFields,
-      ensureNonNullParametersFields:
-          ensureNonNullParametersFields ?? this.ensureNonNullParametersFields,
+      ensureNonNullHeadersFields: ensureNonNullHeadersFields ?? this.ensureNonNullHeadersFields,
+      ensureNonNullParametersFields: ensureNonNullParametersFields ?? this.ensureNonNullParametersFields,
       extra: extra ?? this.extra,
       followRedirects: followRedirects ?? this.followRedirects,
       headers: headers ?? this.headers,
@@ -175,8 +175,7 @@ class APIConfig {
       prefixPath: prefixPath ?? this.prefixPath,
       preserveHeaderCase: preserveHeaderCase ?? this.preserveHeaderCase,
       queryParameters: queryParameters ?? this.queryParameters,
-      receiveDataWhenStatusError:
-          receiveDataWhenStatusError ?? this.receiveDataWhenStatusError,
+      receiveDataWhenStatusError: receiveDataWhenStatusError ?? this.receiveDataWhenStatusError,
       receiveTimeout: receiveTimeout ?? this.receiveTimeout,
       requestEncoder: requestEncoder ?? this.requestEncoder,
       responseDecoder: responseDecoder ?? this.responseDecoder,
@@ -189,12 +188,10 @@ class APIConfig {
 }
 
 class APIEnv {
-  static const baseUrl =
-      String.fromEnvironment('API_BASE_URL', defaultValue: "");
+  static const baseUrl = String.fromEnvironment('API_BASE_URL', defaultValue: "");
 
   /// 根据 enum index
-  static const _envi =
-      int.fromEnvironment('APP_API_ENV', defaultValue: kDebugMode ? 1 : 0);
+  static const _envi = int.fromEnvironment('APP_API_ENV', defaultValue: _kDebugMode ? 1 : 0);
 
   static APIEnvType get env => APIEnvType.values[_envi];
 }
@@ -202,39 +199,22 @@ class APIEnv {
 enum APIEnvType {
   release(
     '正式环境',
-    Color(0xFF00FF00),
   ),
   debug(
     '调试环境',
-    Color(0xFFFFFF00),
   ),
   test(
     '测试环境',
-    Color(0xFFFFA500),
   ),
   local(
     '本地环境',
-    Color(0xFF0000FF),
   );
-
-  final Color color;
 
   final String env;
 
   const APIEnvType(
     this.env,
-    this.color,
   );
-}
-
-class APIURL {
-  APIURL({
-    required this.name,
-    required this.url,
-  });
-
-  final String name;
-  final String url;
 }
 
 enum HTTPMethod {

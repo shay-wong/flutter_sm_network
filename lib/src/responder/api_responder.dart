@@ -14,16 +14,27 @@ class _APIBaseModel<T> extends APIResponder<T> {
   });
 
   factory _APIBaseModel.fromJson(
-    Map<String, dynamic> json, [
+    Map<String, dynamic> json, {
     FromJsonT<T>? fromJsonT,
-  ]) {
+    ParseJsonT<T>? parseJsonT,
+  }) {
     T? data;
     List<T>? dataList;
     final temp = json['data'];
     if (temp is List) {
-      dataList = temp
-          .map((e) => fromJsonT != null && e != null ? fromJsonT(e) : e as T)
-          .toList();
+      dataList = temp.map(
+        (e) {
+          if (parseJsonT != null && e != null && e is Parameters) {
+            return parseJsonT(e);
+          }
+          if (fromJsonT != null && e != null) {
+            return fromJsonT(e);
+          }
+          return e as T;
+        },
+      ).toList();
+    } else if (temp is Parameters && parseJsonT != null) {
+      data = parseJsonT(temp);
     } else if (temp is Map && fromJsonT != null) {
       data = fromJsonT(temp);
     } else {
@@ -48,9 +59,7 @@ class _APIBaseModel<T> extends APIResponder<T> {
     return <String, dynamic>{
       'code': code,
       'data': toJsonT != null ? toJsonT(data) : data,
-      'dataList': toJsonT != null
-          ? dataList?.map((e) => toJsonT(e)).toList()
-          : dataList,
+      'dataList': toJsonT != null ? dataList?.map((e) => toJsonT(e)).toList() : dataList,
       'extra': extra,
       'message': message,
       'success': success,
@@ -81,9 +90,10 @@ abstract class APIResponder<T> {
   });
 
   factory APIResponder.fromJson(
-    Map<String, dynamic> json, [
+    Map<String, dynamic> json, {
     FromJsonT<T>? fromJsonT,
-  ]) = _APIBaseModel.fromJson;
+    ParseJsonT<T>? parseJsonT,
+  }) = _APIBaseModel.fromJson;
 
   int? code;
   T? data;

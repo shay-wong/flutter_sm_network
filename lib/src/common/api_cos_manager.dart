@@ -1,5 +1,5 @@
 import 'package:cross_file/cross_file.dart';
-import 'package:flutter_sm_logger/sm_logger.dart';
+import 'package:sm_logger/sm_logger.dart';
 
 import '../tencent_cos/tencent_cos.dart';
 
