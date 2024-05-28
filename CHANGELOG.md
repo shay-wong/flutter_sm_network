@@ -1,5 +1,9 @@
 # sm_network
 
+## 0.0.7
+
+* update pubspec.
+
 ## 0.0.6
 
 * feat pageable.
