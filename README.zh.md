@@ -40,7 +40,7 @@ flutter pub add sm_network
 
 ``` yaml
 dependencies:
-  sm_network: ^0.0.1
+  sm_network: ^0.0.9
 ```
 
 ## 使用

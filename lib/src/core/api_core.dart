@@ -1,6 +1,4 @@
-import 'package:dio/dio.dart';
-
-import 'api_config.dart';
+import 'package:sm_network/sm_network.dart';
 
 class APICore {
   factory APICore() => _instance;
@@ -14,12 +12,12 @@ class APICore {
   static APICore get instance => _instance;
 
   /// 可以在任意地方调用, 调用之后所有的 [APISession] 都会默认使用这个配置
-  /// 只初始化一次，后续使用 [updataConfig] 来更新配置
+  /// 只初始化一次，后续使用 [updateConfig] 来更新配置
   static void initialize({required APIConfig config}) {
     _config ??= config;
   }
 
-  static void updataConfig(
+  static void updateConfig({
     String? baseUrl,
     Duration? connectTimeout,
     String? contentType,
@@ -36,8 +34,7 @@ class APICore {
     bool? persistentConnection,
     bool? postBodyByDefault,
     BodyFormat? postBodyFormat,
-    @Deprecated(
-        'Use `postBodyByDefault` and `postBodyFormat` instead, it will be removed in next version.')
+    @Deprecated('Use `postBodyByDefault` and `postBodyFormat` instead, it will be removed in next version.')
     bool? postUseFormData,
     String? prefixPath,
     bool? preserveHeaderCase,
@@ -50,7 +47,7 @@ class APICore {
     Duration? sendTimeout,
     String? suffixPath,
     ValidateStatus? validateStatus,
-  ) {
+  }) {
     _config = config.copyWith(
       baseUrl: baseUrl,
       connectTimeout: connectTimeout,

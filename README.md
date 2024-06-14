@@ -42,7 +42,7 @@ Or add the dependency to your `pubspec.yaml` file and run `dart pub get`:
 
 ``` yaml
 dependencies:
-  sm_network: ^0.0.1
+  sm_network: ^0.0.9
 ```
 
 ## Usage

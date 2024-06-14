@@ -11,8 +11,11 @@ void main() {
       sendTimeout: const Duration(seconds: 1),
       postBodyByDefault: true,
       postBodyFormat: BodyFormat.multipart,
-      postUseFormData: true,
     ),
+  );
+
+  APICore.updateConfig(
+    postUseFormData: true,
   );
 
   test(
