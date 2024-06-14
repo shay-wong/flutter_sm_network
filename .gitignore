@@ -33,3 +33,7 @@ doc/api/
 *.ipr
 *.iws
 .markdownlint.json
+.hintrc
+
+# FVM Version Cache
+.fvm/

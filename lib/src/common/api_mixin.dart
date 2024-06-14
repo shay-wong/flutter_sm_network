@@ -5,19 +5,17 @@ import 'package:dio_cache_interceptor/dio_cache_interceptor.dart';
 import 'package:sm_logger/sm_logger.dart';
 
 import '../core/api_config.dart';
-import '../core/api_core.dart';
 import '../interceptors/m_dio_logger.dart';
 import '../responder/api_error.dart';
 import '../responder/api_responder.dart';
+import 'api_options.dart';
 
-mixin APIDioMixin<T, E extends APIResponder<T>> on APIOptions<T> {
-  /// dio 对象
-  late final Dio _dio = config.dio ?? Dio(_baseOptions);
-
-  Dio get dio => _dio;
-
+mixin APIDioMixin<T, E extends APIResponder<T>>
+    on APIXDioMixin, APIParseMixin<T> {
+  /// 创建响应对象, 重写此方法可以自定义响应对象
   E createResponder(dynamic data) {
-    return APIResponder<T>.fromJson(data, fromJsonT: fromJson, parseJsonT: parseJson) as E;
+    return APIResponder<T>.fromJson(data,
+        fromJsonT: fromJson, parseJsonT: parseJson) as E;
   }
 
   E decodeJson(dynamic data) {
@@ -28,71 +26,34 @@ mixin APIDioMixin<T, E extends APIResponder<T>> on APIOptions<T> {
     return createResponder(data);
   }
 
-  void cacheInterceptors({
-    bool isCached = true,
-  }) {
-    if (isCached) {
-      // OPTIMIZE: 自定义接口缓存
-      final cacheInterceptors = DioCacheInterceptor(
-        options: CacheOptions(
-          store: MemCacheStore(),
-        ),
-      );
-      _dio.interceptors.add(cacheInterceptors);
-    }
-  }
-
-  void loggerInterceptors() {
-    if (kPrintable) {
-      // 添加 LogInterceptor 拦截器来自动打印请求、响应日志：
-      _dio.interceptors.add(
-        MDioLogger(
-            requestHeader: true,
-            requestBody: true,
-            maxWidth: consoleOutputLength - 2,
-            logPrint: (object) {
-              logger.p(object);
-            }),
-      );
-    }
-  }
-
   Future<E> request({
     HTTPMethod? method,
+    Object? data,
     Parameters? queryParameters,
-    bool isCached = true,
+    CancelToken? cancelToken,
     Options? options,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+    bool? useBody,
+    BodyFormat? bodyFormat,
+    bool isCached = true,
   }) async {
-    // 添加 DioCacheInterceptor 拦截器实现接口缓存
-    cacheInterceptors(isCached: isCached);
-
-    loggerInterceptors();
-
     // 网络请求
     try {
-      Object? data;
-      queryParameters ??= parameters;
-
-      if (config.ensureNonNullParametersFields) {
-        queryParameters?.removeWhere((key, value) => value == null);
-      }
-
-      if (method == HTTPMethod.POST && config.postUseFormData && queryParameters != null) {
-        data = FormData.fromMap(queryParameters);
-        queryParameters = null;
-      }
-
-      final response = await _dio.request(
-        url,
+      final response = await rawFetch(
+        method: method,
         data: data,
         queryParameters: queryParameters,
-        options: options ??
-            this.options?.copyWith(
-                  method: method?.name,
-                ),
+        cancelToken: cancelToken,
+        options: options,
+        onSendProgress: onSendProgress,
+        onReceiveProgress: onReceiveProgress,
+        useBody: useBody,
+        bodyFormat: bodyFormat,
+        isCached: isCached,
       );
 
-      final responder = decodeJson(response.data);
+      final responder = decodeJson(response);
 
       if (responder.isSuccess || !config.isHandleErrors) {
         return responder;
@@ -112,7 +73,8 @@ mixin APIDioMixin<T, E extends APIResponder<T>> on APIOptions<T> {
         return Future.error(e.error ?? APIError.error());
       }
 
-      if (e.type == DioExceptionType.badResponse && e.response?.statusCode == 503) {
+      if (e.type == DioExceptionType.badResponse &&
+          e.response?.statusCode == 503) {
         return Future.error(
           APIError(
             code: e.response?.statusCode,
@@ -140,7 +102,12 @@ mixin APIDioMixin<T, E extends APIResponder<T>> on APIOptions<T> {
   }
 }
 
-mixin APIOptions<T> {
+mixin APIXDioMixin<X> on APIOptions {
+  /// dio 对象
+  late final Dio _dio = config.dio ?? Dio(_baseOptions);
+
+  Dio get dio => _dio;
+
   BaseOptions? get _baseOptions {
     Parameters? headers = config.headers;
     if (config.ensureNonNullHeadersFields) {
@@ -169,102 +136,130 @@ mixin APIOptions<T> {
     );
   }
 
-  /// 全局配置
-  APIConfig get config => APICore.config;
-
-  ///
-  String? get contentType => null;
-
-  ///
-  Parameters? get extra => null;
-
-  ///
-  bool? get followRedirects => null;
-
-  /// 请求头 默认 null
-  HTTPHeader? get headers => null;
-
-  ///
-  ListFormat? get listFormat => null;
-
-  ///
-  int? get maxRedirects => null;
-
-  /// 请求方式 默认 post
-  HTTPMethod get method => config.method ?? HTTPMethod.GET;
-
-  /// 请求配置
-  Options? get options {
-    Parameters? effectiveHeaders = headers;
-    if (config.ensureNonNullHeadersFields) {
-      effectiveHeaders = effectiveHeaders?..removeWhere((key, value) => value == null);
+  void cacheInterceptors({
+    bool isCached = true,
+  }) {
+    if (isCached) {
+      // OPTIMIZE: 自定义接口缓存
+      final cacheInterceptors = DioCacheInterceptor(
+        options: CacheOptions(
+          store: MemCacheStore(),
+        ),
+      );
+      _dio.interceptors.add(cacheInterceptors);
     }
-    // 请求配置
-    return Options(
-      method: method.name,
-      sendTimeout: sendTimeout,
-      receiveTimeout: receiveTimeout,
-      extra: extra,
-      headers: effectiveHeaders,
-      preserveHeaderCase: preserveHeaderCase,
-      responseType: responseType,
-      contentType: contentType,
-      validateStatus: validateStatus,
-      receiveDataWhenStatusError: receiveDataWhenStatusError,
-      followRedirects: followRedirects,
-      maxRedirects: maxRedirects,
-      persistentConnection: persistentConnection,
-      requestEncoder: requestEncoder,
-      responseDecoder: responseDecoder,
-      listFormat: listFormat,
+  }
+
+  void loggerInterceptors() {
+    if (kPrintable) {
+      // 添加 LogInterceptor 拦截器来自动打印请求、响应日志：
+      _dio.interceptors.add(
+        MDioLogger(
+          requestHeader: true,
+          requestBody: true,
+          maxWidth: consoleOutputLength - 2,
+          logPrint: (object) {
+            logger.p(object);
+          },
+        ),
+      );
+    }
+  }
+
+  Future<X?> rawFetch({
+    String? url,
+    HTTPMethod? method,
+    Object? data,
+    Parameters? queryParameters,
+    CancelToken? cancelToken,
+    Options? options,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+    bool? useBody,
+    BodyFormat? bodyFormat,
+    bool isCached = true,
+  }) async {
+    return rawRequest(
+      url: url,
+      method: method,
+      data: data,
+      queryParameters: queryParameters,
+      cancelToken: cancelToken,
+      options: options,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+      useBody: useBody,
+      bodyFormat: bodyFormat,
+      isCached: isCached,
+    ).then(
+      (value) => value.data,
     );
   }
 
-  /// 请求参数 默认 null
-  Parameters? get parameters => null;
+  /// 发送请求
+  /// 参数优先级高于默认配置
+  /// 如果设置了 [options], 则 [method] 无效, 只会替换默认的 [APIOptions.options] 中的 [method]
+  Future<Response<X>> rawRequest({
+    String? url,
+    HTTPMethod? method,
+    Object? data,
+    Parameters? queryParameters,
+    CancelToken? cancelToken,
+    Options? options,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+    bool? useBody,
+    BodyFormat? bodyFormat,
+    bool isCached = true,
+  }) {
+    // 添加 DioCacheInterceptor 拦截器实现接口缓存
+    cacheInterceptors(isCached: isCached);
 
-  /// [json] 转换函数
-  ParseJsonT<T> get parseJson => fromJson;
+    loggerInterceptors();
 
-  /// 请求路径 默认 null
-  String get path => '';
+    // 初始化参数
+    url ??= this.url;
+    data ??= this.data;
+    method ??= this.method;
+    queryParameters ??= parameters;
+    // TODO: remove postUseFormData
+    useBody ??= this.useBody ||
+        (method == HTTPMethod.POST &&
+            (config.postBodyByDefault || config.postUseFormData));
+    options ??= this.options?.copyWith(method: method.name);
+    bodyFormat ??= this.bodyFormat ??
+        (method == HTTPMethod.POST ? config.postBodyFormat : null);
 
-  ///
-  bool? get persistentConnection => null;
+    if (config.ensureNonNullParametersFields) {
+      queryParameters?.removeWhere((key, value) => value == null);
+    }
 
-  /// 跟随主域名后面的前缀
-  String get prefixPath => config.prefixPath;
+    if (data == null && useBody && queryParameters != null) {
+      if (bodyFormat == BodyFormat.plain) {
+        data = queryParameters.toString();
+      } else if (bodyFormat == BodyFormat.urlencoded) {
+        data = Uri(queryParameters: queryParameters).query;
+      } else if (bodyFormat == BodyFormat.multipart) {
+        data = FormData.fromMap(queryParameters);
+      } else if (bodyFormat == BodyFormat.json) {
+        data = jsonEncode(queryParameters);
+      } else {
+        data = queryParameters;
+      }
+      queryParameters = null;
+      if (bodyFormat != null) {
+        options?.contentType = bodyFormat.contentType;
+      }
+    }
 
-  ///
-  bool? get preserveHeaderCase => null;
-
-  ///
-  bool? get receiveDataWhenStatusError => null;
-
-  /// 接收超时时间
-  Duration? get receiveTimeout => null;
-
-  ///
-  RequestEncoder? get requestEncoder => null;
-
-  ///
-  ResponseDecoder? get responseDecoder => null;
-
-  ///
-  ResponseType? get responseType => null;
-
-  /// 发送超时时间
-  Duration? get sendTimeout => null;
-
-  /// 跟随主域名后面的后缀
-  String get suffixPath => config.suffixPath;
-
-  /// 请求 [url], 由 [prefixPath]、[path] 和 [suffixPath] 组成
-  String get url => prefixPath + path + suffixPath;
-
-  ///
-  ValidateStatus? get validateStatus => null;
-
-  /// 将 [json] 转换为对应的 [T] 类型
-  T fromJson(dynamic json) => json as T;
+    return _dio.request<X>(
+      url,
+      data: data,
+      queryParameters: queryParameters,
+      cancelToken: cancelToken,
+      options: options,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+  }
 }

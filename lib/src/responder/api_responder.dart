@@ -59,7 +59,9 @@ class _APIBaseModel<T> extends APIResponder<T> {
     return <String, dynamic>{
       'code': code,
       'data': toJsonT != null ? toJsonT(data) : data,
-      'dataList': toJsonT != null ? dataList?.map((e) => toJsonT(e)).toList() : dataList,
+      'dataList': toJsonT != null
+          ? dataList?.map((e) => toJsonT(e)).toList()
+          : dataList,
       'extra': extra,
       'message': message,
       'success': success,

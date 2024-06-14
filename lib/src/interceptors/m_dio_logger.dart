@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:math' as math;
 import 'dart:typed_data';
 
@@ -140,61 +141,6 @@ class MDioLogger extends Interceptor {
     super.onResponse(response, handler);
   }
 
-  bool _canFlattenList(List list) {
-    return list.length < 10 && list.toString().length < maxWidth;
-  }
-
-  bool _canFlattenMap(Map map) {
-    return map.values
-            .where((dynamic val) => val is Map || val is List)
-            .isEmpty &&
-        map.toString().length < maxWidth;
-  }
-
-  String _flattenList(List list) {
-    String listString = '[';
-
-    list.asMap().forEach((i, dynamic e) {
-      final isLast = i == list.length - 1;
-      if (e is String) {
-        e = '"${e.toString().replaceAll(RegExp(r'([\r\n])+'), " ")}"';
-      }
-      if (e is Map) {
-        e = _flattenMap(e);
-      } else if (e is List) {
-        e = _flattenList(e);
-      } else {
-        e = e.toString().replaceAll('\n', '');
-      }
-      listString += '$e${isLast ? '' : ', '}';
-    });
-
-    listString += ']';
-
-    return listString;
-  }
-
-  String _flattenMap(Map map) {
-    String mapString = '{';
-    map.keys.toList().asMap().forEach((index, dynamic key) {
-      final isLast = index == map.length - 1;
-      dynamic value = map[key];
-      if (value is String) {
-        value = '"${value.toString().replaceAll(RegExp(r'([\r\n])+'), " ")}"';
-      }
-      if (value is Map) {
-        value = _flattenMap(value);
-      } else if (value is List) {
-        value = _flattenList(value);
-      } else {
-        value = value.toString().replaceAll('\n', '');
-      }
-      mapString += '"$key": $value${isLast ? '' : ', '}';
-    });
-    mapString += '}';
-    return mapString;
-  }
-
   String _indent([int tabCount = kInitialTab]) => tabStep * tabCount;
 
   Map<String, dynamic> _mergeListToMap(
@@ -247,97 +193,12 @@ class MDioLogger extends Interceptor {
   void _printLine([String pre = '', String suf = '╝']) =>
       logs.add('$pre${'═' * (maxWidth - pre.length)}$suf');
 
-  void _printList(List list, {int tabs = kInitialTab}) {
-    list.asMap().forEach((i, dynamic e) {
-      final isLast = i == list.length - 1;
-      if (e is String) {
-        e = '"${e.toString().replaceAll(RegExp(r'([\r\n])+'), " ")}"';
-      }
-      if (e is Map) {
-        if (compact && _canFlattenMap(e)) {
-          logs.add('${_indent(tabs)}  ${_flattenMap(e)}${!isLast ? ',' : ''}');
-        } else {
-          _printPrettyMap(e,
-              initialTab: tabs + 1, isListItem: true, isLast: isLast);
-        }
-      } else if (e is List) {
-        if (compact && _canFlattenList(e)) {
-          logs.add('${_indent(tabs)}  ${_flattenList(e)}${!isLast ? ',' : ''}');
-        } else {
-          logs.add('${_indent()}[');
-          _printList(e);
-          logs.add('${_indent()}]');
-        }
-      } else {
-        logs.add('${_indent(tabs + 2)} $e${isLast ? '' : ','}');
-      }
-    });
-  }
-
   void _printMapAsTable(Map? map, {String? header}) {
     if (map == null || map.isEmpty) return;
     logs.add('╔ $header ');
     map.forEach(
         (dynamic key, dynamic value) => _printKV(key.toString(), value));
     _printLine('╚');
-  }
-
-  void _printPrettyMap(
-    Map data, {
-    int initialTab = kInitialTab,
-    bool isListItem = false,
-    bool isLast = false,
-  }) {
-    var tabs = initialTab;
-    final isRoot = tabs == kInitialTab;
-    final initialIndent = _indent(tabs);
-    tabs++;
-
-    if (isRoot || isListItem) {
-      logs.add('$initialIndent{');
-    }
-
-    data.keys.toList().asMap().forEach((index, dynamic key) {
-      final isLast = index == data.length - 1;
-      dynamic value = data[key];
-      if (value is String) {
-        value = '"${value.toString().replaceAll(RegExp(r'([\r\n])+'), " ")}"';
-      }
-      if (value is Map) {
-        if (compact && _canFlattenMap(value)) {
-          logs.add(
-              '${_indent(tabs)} "$key": ${_flattenMap(value)}${!isLast ? ',' : ''}');
-        } else {
-          logs.add('${_indent(tabs)} "$key": {');
-          _printPrettyMap(value, initialTab: tabs);
-        }
-      } else if (value is List) {
-        if (compact && _canFlattenList(value)) {
-          logs.add(
-              '${_indent(tabs)} "$key": ${_flattenList(value)}${!isLast ? ',' : ''}');
-        } else {
-          logs.add('${_indent(tabs)} "$key": [');
-          _printList(value, tabs: tabs);
-          logs.add('${_indent(tabs)} ]${isLast ? '' : ','}');
-        }
-      } else {
-        final msg = value.toString().replaceAll('\n', '');
-        // TODO: 自动换行
-        // final indent = _indent(tabs);
-        // final linWidth = maxWidth - indent.length;
-        // if (msg.length + indent.length > linWidth) {
-        //   final lines = (msg.length / linWidth).ceil();
-        //   for (var i = 0; i < lines; ++i) {
-        //     logPrint(
-        //         '${_indent(tabs)} ${msg.substring(i * linWidth, math.min<int>(i * linWidth + linWidth, msg.length))}');
-        //   }
-        // } else {
-        logs.add('${_indent(tabs)} "$key": $msg${!isLast ? ',' : ''}');
-        // }
-      }
-    });
-
-    logs.add('$initialIndent}${isListItem && !isLast ? ',' : ''}');
   }
 
   void _printRequestHeader(RequestOptions options) {
@@ -348,15 +209,20 @@ class MDioLogger extends Interceptor {
 
   void _printResponse(Response response) {
     if (response.data != null) {
-      if (response.data is Map) {
-        _printPrettyMap(response.data as Map);
+      if (response.data is Map || response.data is Iterable) {
+        var encoder = JsonEncoder.withIndent(
+          _indent(),
+          (object) => object.toString(),
+        );
+        logs.add(
+          encoder.convert(response.data).splitMapJoin(
+                '\n',
+                onNonMatch: (line) => _indent() + line,
+              ),
+        );
       } else if (response.data is Uint8List) {
         logs.add('${_indent()}[');
         _printUint8List(response.data as Uint8List);
-        logs.add('${_indent()}]');
-      } else if (response.data is List) {
-        logs.add('${_indent()}[');
-        _printList(response.data as List);
         logs.add('${_indent()}]');
       } else {
         _printBlock(response.data.toString());

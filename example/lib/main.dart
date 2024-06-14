@@ -8,11 +8,13 @@ import 'refresh1.dart';
 
 void main() {
   APICore.initialize(
-    APIConfig(
+    config: APIConfig(
       baseUrl: 'https://example.com',
       connectTimeout: const Duration(seconds: 1),
       receiveTimeout: const Duration(seconds: 1),
       sendTimeout: const Duration(seconds: 1),
+      postBodyByDefault: true,
+      postBodyFormat: BodyFormat.multipart,
     ),
   );
 
@@ -65,12 +67,20 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   load() async {
+    // data 是 String
     fetch(GetStringAPI());
+    fetch(PostStringAPI());
+    // data 是 Number
     fetch(GetNumAPI());
+    // data 是 Map
     fetch(GetMapAPI());
     fetchList(GetListAPI());
-    fetchList(GetList01API());
+    // 如果返回的 data 是 list, 那么fetch 返回的就是 null， 应该要用 fetchList
     fetch(GetList01API());
+    // data 是 List 使用
+    fetchList(GetList01API());
+    // 超时请求
+    fetch(GetTimeOutAPI());
   }
 
   void _incrementCounter() {

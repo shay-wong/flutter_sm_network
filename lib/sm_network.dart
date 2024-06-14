@@ -4,6 +4,7 @@ export 'package:dio/dio.dart';
 export 'package:json_annotation/json_annotation.dart';
 
 export 'src/common/api_mixin.dart';
+export 'src/common/api_options.dart';
 export 'src/common/api_pageable.dart';
 export 'src/common/api_session.dart';
 export 'src/core/api_config.dart';

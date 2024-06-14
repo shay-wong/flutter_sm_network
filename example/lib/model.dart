@@ -22,7 +22,8 @@ class BaseModel<T> extends APIResponder<T> {
     FromJsonT<T>? fromJsonT,
     ParseJsonT<T>? parseJsonT,
   }) {
-    final responder = APIResponder.fromJson(json, fromJsonT: fromJsonT, parseJsonT: parseJsonT);
+    final responder = APIResponder.fromJson(json,
+        fromJsonT: fromJsonT, parseJsonT: parseJsonT);
     return BaseModel<T>(
       code: responder.code,
       data: responder.data,
@@ -37,7 +38,8 @@ class BaseModel<T> extends APIResponder<T> {
   final String? serviceInfo;
 
   @override
-  String toString() => 'BaseModel(serviceInfo: $serviceInfo)super=>${super.toString()}';
+  String toString() =>
+      'BaseModel(serviceInfo: $serviceInfo)super=>${super.toString()}';
 }
 
 @JsonSerializable()
@@ -51,7 +53,8 @@ class Person {
     this.adulthood,
   );
 
-  factory Person.fromJson(Map<String, dynamic> srcJson) => _$PersonFromJson(srcJson);
+  factory Person.fromJson(Map<String, dynamic> srcJson) =>
+      _$PersonFromJson(srcJson);
 
   @JsonKey(name: 'age')
   num? age;
