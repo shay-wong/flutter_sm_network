@@ -1,17 +1,23 @@
-import 'package:dio/dio.dart';
 import 'package:sm_logger/sm_logger.dart';
-
-import '../core/api_config.dart';
-import '../responder/api_responder.dart';
-import 'api_mixin.dart';
-import 'api_options.dart';
-import 'api_session.dart';
+import 'package:sm_network/sm_network.dart';
 
 class APIPageable {
-  bool isNoMoreData = false;
+  APIPageable({
+    int pageNumber = 1,
+    this.pageSize = 10,
+    this.numberKey = 'pageNumber',
+    this.sizeKey = 'pageSize',
+  })  : _pageNumber = pageNumber,
+        assert(pageNumber >= 0 && pageSize >= 0, 'pageNumber and pageSize must >= 0'),
+        _firstPage = pageNumber;
 
+  final String numberKey;
+  final String sizeKey;
+
+  bool isNoMoreData = false;
   // 每页大小
   final int pageSize;
+
   // 第一页
   final int _firstPage;
 
@@ -19,51 +25,27 @@ class APIPageable {
   bool _isRefresh = true;
 
   // 第几页
-  int _pageNum;
-
-  APIPageable({
-    int pageNum = 1,
-    this.pageSize = 10,
-  })  : _pageNum = pageNum,
-        assert(pageNum >= 0 && pageSize >= 0, 'pageNum and pageSize must >= 0'),
-        _firstPage = pageNum;
+  int _pageNumber;
 
   bool get isRefresh => _isRefresh;
+  int get pageNumber => _pageNumber;
+
   set isRefresh(bool ref) {
     _isRefresh = ref;
     if (_isRefresh) {
-      pageNum = _firstPage;
+      pageNumber = _firstPage;
     } else {
-      pageNum++;
+      pageNumber++;
     }
   }
 
-  int get pageNum => _pageNum;
-
-  set pageNum(int value) {
-    _pageNum = value;
+  set pageNumber(int value) {
+    _pageNumber = value;
     logger.d(value);
   }
 }
 
 mixin APIPageableMixin<T> on APIDioMixin<T, APIResponder<T>> {
-  APIPageable get pageable => APIPageable();
-
-  Parameters get pageableParameters => {
-        'pageNum': pageable.pageNum,
-        'pageSize': pageable.pageSize,
-        ...?parameters,
-      };
-  Future<List<T>?> load({bool isCached = true}) async {
-    pageable.isRefresh = false;
-    return request(isCached: isCached).then((value) => value.dataList);
-  }
-
-  Future<List<T>?> refresh({bool isCached = true}) async {
-    pageable.isRefresh = true;
-    return request(isCached: isCached).then((value) => value.dataList);
-  }
-
   @override
   Future<APIResponder<T>> request({
     HTTPMethod? method,
@@ -90,8 +72,7 @@ mixin APIPageableMixin<T> on APIDioMixin<T, APIResponder<T>> {
         isCached: isCached,
       );
       if (response.isSuccess || response.dataList != null) {
-        pageable.isNoMoreData =
-            (response.dataList?.length ?? 0) <= pageable.pageSize;
+        pageable.isNoMoreData = (response.dataList?.length ?? 0) <= pageable.pageSize;
       } else {
         _pageableError();
       }
@@ -102,19 +83,38 @@ mixin APIPageableMixin<T> on APIDioMixin<T, APIResponder<T>> {
     }
   }
 
+  APIPageable get pageable => APIPageable();
+  Parameters get pageableParameters => {
+        pageable.numberKey: pageable.pageNumber,
+        pageable.sizeKey: pageable.pageSize,
+        ...?parameters,
+      };
+
+  Future<List<T>?> load({bool isCached = true}) async {
+    pageable.isRefresh = false;
+    return request(isCached: isCached).then((value) => value.dataList);
+  }
+
+  Future<List<T>?> refresh({bool isCached = true}) async {
+    pageable.isRefresh = true;
+    return request(isCached: isCached).then((value) => value.dataList);
+  }
+
   void _pageableError() {
     if (pageable.isRefresh) {
     } else {
-      pageable.pageNum--;
+      pageable.pageNumber--;
     }
   }
 }
 
 abstract class APIPageableSession<T> extends APIXSession
     with APIParseMixin<T>, APIDioMixin<T, APIResponder<T>>, APIPageableMixin {
-  final APIPageable _pageable;
+  APIPageableSession({
+    APIPageable? pageable,
+  }) : _pageable = pageable ?? APIPageable();
 
-  APIPageableSession({required APIPageable pageable}) : _pageable = pageable;
+  final APIPageable _pageable;
 
   @override
   APIPageable get pageable => _pageable;

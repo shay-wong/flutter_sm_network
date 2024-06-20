@@ -13,7 +13,9 @@ class APICore {
 
   /// 可以在任意地方调用, 调用之后所有的 [APISession] 都会默认使用这个配置
   /// 只初始化一次，后续使用 [updateConfig] 来更新配置
-  static void initialize({required APIConfig config}) {
+  static void initialize({
+    required APIConfig config,
+  }) {
     _config ??= config;
   }
 

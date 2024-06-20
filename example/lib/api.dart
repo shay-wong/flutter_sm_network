@@ -232,7 +232,7 @@ class RefreshAPI extends APIPageableSession<int> {
       dio,
       url,
       List.generate(
-          pageable.pageSize, (index) => 10 * (pageable.pageNum - 1) + index),
+          pageable.pageSize, (index) => 10 * (pageable.pageNumber - 1) + index),
       delay: const Duration(seconds: 1),
     );
     return super.request(
