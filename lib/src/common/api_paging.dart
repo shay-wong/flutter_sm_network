@@ -4,13 +4,15 @@ class APIPaging {
   APIPaging({
     int? pageNumber,
     int? pageSize,
-    this.numberKey = 'pageNumber',
-    this.sizeKey = 'pageSize',
+    String? numberKey,
+    String? sizeKey,
   })  : pageNumber = pageNumber ?? APICore.pagingConfig.pageNumber,
         pageSize = pageSize ?? APICore.pagingConfig.pageSize,
         assert((pageNumber == null || pageNumber >= 0) && (pageSize == null || pageSize >= 0),
             'pageNumber and pageSize must be >= 0 if they are not null'),
-        _firstPage = pageNumber ?? APICore.pagingConfig.pageNumber;
+        _firstPage = pageNumber ?? APICore.pagingConfig.pageNumber,
+        numberKey = numberKey ?? APICore.pagingConfig.numberKey,
+        sizeKey = sizeKey ?? APICore.pagingConfig.sizeKey;
 
   final String numberKey;
   final String sizeKey;
