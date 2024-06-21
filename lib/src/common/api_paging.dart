@@ -1,15 +1,16 @@
-import 'package:sm_logger/sm_logger.dart';
 import 'package:sm_network/sm_network.dart';
 
-class APIPageable {
-  APIPageable({
-    int pageNumber = 1,
-    this.pageSize = 10,
+class APIPaging {
+  APIPaging({
+    int? pageNumber,
+    int? pageSize,
     this.numberKey = 'pageNumber',
     this.sizeKey = 'pageSize',
-  })  : _pageNumber = pageNumber,
-        assert(pageNumber >= 0 && pageSize >= 0, 'pageNumber and pageSize must >= 0'),
-        _firstPage = pageNumber;
+  })  : pageNumber = pageNumber ?? APICore.pagingConfig.pageNumber,
+        pageSize = pageSize ?? APICore.pagingConfig.pageSize,
+        assert((pageNumber == null || pageNumber >= 0) && (pageSize == null || pageSize >= 0),
+            'pageNumber and pageSize must be >= 0 if they are not null'),
+        _firstPage = pageNumber ?? APICore.pagingConfig.pageNumber;
 
   final String numberKey;
   final String sizeKey;
@@ -25,10 +26,9 @@ class APIPageable {
   bool _isRefresh = true;
 
   // 第几页
-  int _pageNumber;
+  int pageNumber;
 
   bool get isRefresh => _isRefresh;
-  int get pageNumber => _pageNumber;
 
   set isRefresh(bool ref) {
     _isRefresh = ref;
@@ -38,14 +38,9 @@ class APIPageable {
       pageNumber++;
     }
   }
-
-  set pageNumber(int value) {
-    _pageNumber = value;
-    logger.d(value);
-  }
 }
 
-mixin APIPageableMixin<T> on APIDioMixin<T, APIResponder<T>> {
+mixin APIPagingMixin<T> on APIDioMixin<T, APIResponder<T>> {
   @override
   Future<APIResponder<T>> request({
     HTTPMethod? method,
@@ -83,7 +78,7 @@ mixin APIPageableMixin<T> on APIDioMixin<T, APIResponder<T>> {
     }
   }
 
-  APIPageable get pageable => APIPageable();
+  APIPaging get pageable => APIPaging();
   Parameters get pageableParameters => {
         pageable.numberKey: pageable.pageNumber,
         pageable.sizeKey: pageable.pageSize,
@@ -108,14 +103,14 @@ mixin APIPageableMixin<T> on APIDioMixin<T, APIResponder<T>> {
   }
 }
 
-abstract class APIPageableSession<T> extends APIXSession
-    with APIParseMixin<T>, APIDioMixin<T, APIResponder<T>>, APIPageableMixin {
-  APIPageableSession({
-    APIPageable? pageable,
-  }) : _pageable = pageable ?? APIPageable();
+abstract class APIPagingSession<T> extends APIXSession
+    with APIParseMixin<T>, APIDioMixin<T, APIResponder<T>>, APIPagingMixin {
+  APIPagingSession({
+    APIPaging? pageable,
+  }) : _pageable = pageable ?? APIPaging();
 
-  final APIPageable _pageable;
+  final APIPaging _pageable;
 
   @override
-  APIPageable get pageable => _pageable;
+  APIPaging get pageable => _pageable;
 }

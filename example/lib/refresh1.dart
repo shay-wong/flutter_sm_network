@@ -14,7 +14,7 @@ class Refresh1 extends StatefulWidget {
 class _RefreshState extends State<Refresh1> {
   List<int> datas = [];
 
-  final APIPageable loader = APIPageable();
+  final APIPaging loader = APIPaging();
   final RefreshController _refreshController = RefreshController();
 
   @override
@@ -26,7 +26,7 @@ class _RefreshState extends State<Refresh1> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Refresh'),
+        title: const Text('Refresh1'),
       ),
       body: SmartRefresher(
         onRefresh: () async {

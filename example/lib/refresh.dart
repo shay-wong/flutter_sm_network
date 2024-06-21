@@ -13,7 +13,7 @@ class Refresh extends StatefulWidget {
 class _RefreshState extends State<Refresh> {
   List<int> datas = [];
 
-  final APIPageable loader = APIPageable();
+  final APIPaging loader = APIPaging(numberKey: 'pageIndex', sizeKey: 'pageSize');
 
   @override
   void initState() {

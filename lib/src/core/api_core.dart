@@ -6,17 +6,21 @@ class APICore {
   APICore._();
 
   static APIConfig? _config;
+  static APIPagingConfig? _pagingConfig;
   static final APICore _instance = APICore._();
 
-  static APIConfig get config => _config ?? APIConfig();
+  static APIConfig get config => _config ??= APIConfig();
+  static APIPagingConfig get pagingConfig => _pagingConfig ??= APIPagingConfig();
   static APICore get instance => _instance;
 
   /// 可以在任意地方调用, 调用之后所有的 [APISession] 都会默认使用这个配置
   /// 只初始化一次，后续使用 [updateConfig] 来更新配置
   static void initialize({
     required APIConfig config,
+    APIPagingConfig? pagingConfig,
   }) {
     _config ??= config;
+    _pagingConfig ??= pagingConfig;
   }
 
   static void updateConfig({
@@ -49,6 +53,10 @@ class APICore {
     Duration? sendTimeout,
     String? suffixPath,
     ValidateStatus? validateStatus,
+    String? numberKey,
+    int? pageNumber,
+    int? pageSize,
+    String? sizeKey,
   }) {
     assert(_config != null, 'You must initialize the APICore first');
     if (_config != null) {
@@ -81,6 +89,14 @@ class APICore {
         sendTimeout: sendTimeout,
         suffixPath: suffixPath,
         validateStatus: validateStatus,
+      );
+    }
+    if (numberKey != null && pageNumber != null && pageSize != null && sizeKey != null) {
+      _pagingConfig = pagingConfig.copyWith(
+        numberKey: numberKey,
+        pageNumber: pageNumber,
+        pageSize: pageSize,
+        sizeKey: sizeKey,
       );
     }
   }

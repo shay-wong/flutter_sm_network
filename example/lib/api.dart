@@ -209,7 +209,7 @@ class PostStringAPI extends APIRequest<String> {
   // bool get useBody => true;
 }
 
-class RefreshAPI extends APIPageableSession<int> {
+class RefreshAPI extends APIPagingSession<int> {
   RefreshAPI({required super.pageable});
 
   @override
