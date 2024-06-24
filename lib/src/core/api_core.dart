@@ -10,7 +10,8 @@ class APICore {
   static final APICore _instance = APICore._();
 
   static APIConfig get config => _config ??= APIConfig();
-  static APIPagingConfig get pagingConfig => _pagingConfig ??= APIPagingConfig();
+  static APIPagingConfig get pagingConfig =>
+      _pagingConfig ??= APIPagingConfig();
   static APICore get instance => _instance;
 
   /// 可以在任意地方调用, 调用之后所有的 [APISession] 都会默认使用这个配置
@@ -40,7 +41,8 @@ class APICore {
     bool? persistentConnection,
     bool? postBodyByDefault,
     BodyFormat? postBodyFormat,
-    @Deprecated('Use `postBodyByDefault` and `postBodyFormat` instead, it will be removed in next version.')
+    @Deprecated(
+        'Use `postBodyByDefault` and `postBodyFormat` instead, it will be removed in next version.')
     bool? postUseFormData,
     String? prefixPath,
     bool? preserveHeaderCase,
@@ -91,7 +93,10 @@ class APICore {
         validateStatus: validateStatus,
       );
     }
-    if (numberKey != null && pageNumber != null && pageSize != null && sizeKey != null) {
+    if (numberKey != null &&
+        pageNumber != null &&
+        pageSize != null &&
+        sizeKey != null) {
       _pagingConfig = pagingConfig.copyWith(
         numberKey: numberKey,
         pageNumber: pageNumber,

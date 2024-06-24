@@ -30,12 +30,12 @@ class _RefreshState extends State<Refresh1> {
       ),
       body: SmartRefresher(
         onRefresh: () async {
-          datas = await RefreshAPI(pageable: loader).refresh() ?? [];
+          datas = await RefreshAPI(paging: loader).refresh() ?? [];
           _refreshController.refreshCompleted();
           setState(() {});
         },
         onLoading: () async {
-          final res = await RefreshAPI(pageable: loader).load() ?? [];
+          final res = await RefreshAPI(paging: loader).load() ?? [];
           _refreshController.loadComplete();
           datas.addAll(res);
           setState(() {});

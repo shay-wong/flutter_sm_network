@@ -210,10 +210,10 @@ class PostStringAPI extends APIRequest<String> {
 }
 
 class RefreshAPI extends APIPagingSession<int> {
-  RefreshAPI({required super.pageable});
+  RefreshAPI({required super.paging});
 
   @override
-  String get path => '/getPageable';
+  String get path => '/getPaging';
 
   @override
   Future<APIResponder<int>> request({
@@ -232,13 +232,13 @@ class RefreshAPI extends APIPagingSession<int> {
       dio,
       url,
       List.generate(
-          pageable.pageSize, (index) => 10 * (pageable.pageNumber - 1) + index),
+          paging.pageSize, (index) => 10 * (paging.pageNumber - 1) + index),
       delay: const Duration(seconds: 1),
     );
     return super.request(
       method: method,
       data: data,
-      queryParameters: queryParameters ?? pageableParameters,
+      queryParameters: queryParameters ?? pagingParameters,
       options: options,
       onSendProgress: onSendProgress,
       onReceiveProgress: onReceiveProgress,

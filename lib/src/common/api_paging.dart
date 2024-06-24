@@ -8,7 +8,9 @@ class APIPaging {
     String? sizeKey,
   })  : pageNumber = pageNumber ?? APICore.pagingConfig.pageNumber,
         pageSize = pageSize ?? APICore.pagingConfig.pageSize,
-        assert((pageNumber == null || pageNumber >= 0) && (pageSize == null || pageSize >= 0),
+        assert(
+            (pageNumber == null || pageNumber >= 0) &&
+                (pageSize == null || pageSize >= 0),
             'pageNumber and pageSize must be >= 0 if they are not null'),
         _firstPage = pageNumber ?? APICore.pagingConfig.pageNumber,
         numberKey = numberKey ?? APICore.pagingConfig.numberKey,
@@ -60,7 +62,7 @@ mixin APIPagingMixin<T> on APIDioMixin<T, APIResponder<T>> {
       final response = await super.request(
         method: method,
         data: data,
-        queryParameters: queryParameters ?? pageableParameters,
+        queryParameters: queryParameters ?? pagingParameters,
         options: options,
         onSendProgress: onSendProgress,
         onReceiveProgress: onReceiveProgress,
@@ -69,38 +71,39 @@ mixin APIPagingMixin<T> on APIDioMixin<T, APIResponder<T>> {
         isCached: isCached,
       );
       if (response.isSuccess || response.dataList != null) {
-        pageable.isNoMoreData = (response.dataList?.length ?? 0) <= pageable.pageSize;
+        paging.isNoMoreData =
+            (response.dataList?.length ?? 0) <= paging.pageSize;
       } else {
-        _pageableError();
+        _pagingError();
       }
       return response;
     } catch (e) {
-      _pageableError();
+      _pagingError();
       return Future.error(e);
     }
   }
 
-  APIPaging get pageable => APIPaging();
-  Parameters get pageableParameters => {
-        pageable.numberKey: pageable.pageNumber,
-        pageable.sizeKey: pageable.pageSize,
+  APIPaging get paging => APIPaging();
+  Parameters get pagingParameters => {
+        paging.numberKey: paging.pageNumber,
+        paging.sizeKey: paging.pageSize,
         ...?parameters,
       };
 
   Future<List<T>?> load({bool isCached = true}) async {
-    pageable.isRefresh = false;
+    paging.isRefresh = false;
     return request(isCached: isCached).then((value) => value.dataList);
   }
 
   Future<List<T>?> refresh({bool isCached = true}) async {
-    pageable.isRefresh = true;
+    paging.isRefresh = true;
     return request(isCached: isCached).then((value) => value.dataList);
   }
 
-  void _pageableError() {
-    if (pageable.isRefresh) {
+  void _pagingError() {
+    if (paging.isRefresh) {
     } else {
-      pageable.pageNumber--;
+      paging.pageNumber--;
     }
   }
 }
@@ -108,11 +111,11 @@ mixin APIPagingMixin<T> on APIDioMixin<T, APIResponder<T>> {
 abstract class APIPagingSession<T> extends APIXSession
     with APIParseMixin<T>, APIDioMixin<T, APIResponder<T>>, APIPagingMixin {
   APIPagingSession({
-    APIPaging? pageable,
-  }) : _pageable = pageable ?? APIPaging();
+    APIPaging? paging,
+  }) : _paging = paging ?? APIPaging();
 
-  final APIPaging _pageable;
+  final APIPaging _paging;
 
   @override
-  APIPaging get pageable => _pageable;
+  APIPaging get paging => _paging;
 }

@@ -13,7 +13,8 @@ class Refresh extends StatefulWidget {
 class _RefreshState extends State<Refresh> {
   List<int> datas = [];
 
-  final APIPaging loader = APIPaging(numberKey: 'pageIndex', sizeKey: 'pageSize');
+  final APIPaging loader =
+      APIPaging(numberKey: 'pageIndex', sizeKey: 'pageSize');
 
   @override
   void initState() {
@@ -28,11 +29,11 @@ class _RefreshState extends State<Refresh> {
       ),
       body: EasyRefresh(
         onRefresh: () async {
-          datas = await RefreshAPI(pageable: loader).refresh() ?? [];
+          datas = await RefreshAPI(paging: loader).refresh() ?? [];
           setState(() {});
         },
         onLoad: () async {
-          final res = await RefreshAPI(pageable: loader).load() ?? [];
+          final res = await RefreshAPI(paging: loader).load() ?? [];
           datas.addAll(res);
           setState(() {});
         },
