@@ -1,5 +1,9 @@
 # sm_network
 
+## 0.1.1+1
+
+* fix paging.
+
 ## 0.1.1
 
 * rename pageable to paging.

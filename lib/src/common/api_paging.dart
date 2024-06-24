@@ -8,9 +8,7 @@ class APIPaging {
     String? sizeKey,
   })  : pageNumber = pageNumber ?? APICore.pagingConfig.pageNumber,
         pageSize = pageSize ?? APICore.pagingConfig.pageSize,
-        assert(
-            (pageNumber == null || pageNumber >= 0) &&
-                (pageSize == null || pageSize >= 0),
+        assert((pageNumber == null || pageNumber >= 0) && (pageSize == null || pageSize >= 0),
             'pageNumber and pageSize must be >= 0 if they are not null'),
         _firstPage = pageNumber ?? APICore.pagingConfig.pageNumber,
         numberKey = numberKey ?? APICore.pagingConfig.numberKey,
@@ -70,9 +68,8 @@ mixin APIPagingMixin<T> on APIDioMixin<T, APIResponder<T>> {
         bodyFormat: bodyFormat,
         isCached: isCached,
       );
-      if (response.isSuccess || response.dataList != null) {
-        paging.isNoMoreData =
-            (response.dataList?.length ?? 0) <= paging.pageSize;
+      if (response.isSuccess) {
+        paging.isNoMoreData = (response.dataList?.isEmpty ?? true) || response.dataList!.length < paging.pageSize;
       } else {
         _pagingError();
       }
@@ -90,14 +87,56 @@ mixin APIPagingMixin<T> on APIDioMixin<T, APIResponder<T>> {
         ...?parameters,
       };
 
-  Future<List<T>?> load({bool isCached = true}) async {
+  Future<List<T>?> load({
+    HTTPMethod? method,
+    Object? data,
+    Parameters? queryParameters,
+    CancelToken? cancelToken,
+    Options? options,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+    bool? useBody,
+    BodyFormat? bodyFormat,
+    bool isCached = true,
+  }) async {
     paging.isRefresh = false;
-    return request(isCached: isCached).then((value) => value.dataList);
+    return request(
+      method: method,
+      data: data,
+      queryParameters: queryParameters,
+      options: options,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+      useBody: useBody,
+      bodyFormat: bodyFormat,
+      isCached: isCached,
+    ).then((value) => value.dataList);
   }
 
-  Future<List<T>?> refresh({bool isCached = true}) async {
+  Future<List<T>?> refresh({
+    HTTPMethod? method,
+    Object? data,
+    Parameters? queryParameters,
+    CancelToken? cancelToken,
+    Options? options,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+    bool? useBody,
+    BodyFormat? bodyFormat,
+    bool isCached = true,
+  }) async {
     paging.isRefresh = true;
-    return request(isCached: isCached).then((value) => value.dataList);
+    return request(
+      method: method,
+      data: data,
+      queryParameters: queryParameters,
+      options: options,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+      useBody: useBody,
+      bodyFormat: bodyFormat,
+      isCached: isCached,
+    ).then((value) => value.dataList);
   }
 
   void _pagingError() {
