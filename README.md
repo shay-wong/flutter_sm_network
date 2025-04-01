@@ -17,7 +17,7 @@ A Flutter networking library that provides several commonly used features:
 - [x] <span style="color: lightgreen;">Supports JSON parsing</span>
 - [x] <span style="color: lightgreen;">Supports printing logs to the console</span>
 - [x] <span style="color: lightgreen;">Supports printing error information to the console</span>
-- [ ] <span style="color: #A9A9A9;">Initial configuration</span>
+- [x] <span style="color: #A9A9A9;">Initial configuration</span>
 - [ ] <span style="color: #A9A9A9;">Supports log writing to file cache</span>
 
 ## Installing

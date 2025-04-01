@@ -1,4 +1,503 @@
 include: package:flutter_lints/flutter.yaml
 
-# Additional information about this file can be found at
-# https://dart.dev/guides/language/analysis-options
+analyzer:
+  exclude:
+    - "**/*.g.dart"
+    - "lib/generated/*"
+
+formatter:
+  page_width: 100
+
+# See https://dart.dev/tools/linter-rules
+linter:
+  rules:
+    # 声明方法返回类型。
+    - always_declare_return_types
+    # 将控制结构表达式与其语句分开。
+    - always_put_control_body_on_new_line
+    # 将必需的命名参数放在前面。
+    - always_put_required_named_parameters_first
+    # 对没有默认值的命名参数标记@required。
+    - always_require_non_null_named_parameters
+    # 显式指定类型注解。
+    # - always_specify_types
+    # 避免使用相对路径导入lib目录文件。
+    # - always_use_package_imports
+    # 用@override标注重写成员。
+    - annotate_overrides
+    # 用@redeclare标注重新声明的成员。
+    - annotate_redeclares
+    # 避免不必要的dynamic类型标注。
+    # - avoid_annotating_with_dynamic
+    # 避免使用as类型转换。此规则已从 Dart 3 的 SDK 中删除.
+    # - avoid_as
+    # 条件表达式中避免布尔字面量。
+    - avoid_bool_literals_in_conditional_expressions
+    # 避免不带on子句的catch。
+    # - avoid_catches_without_on_clauses
+    # 不要显式捕获Error类型。
+    # - avoid_catching_errors
+    # 避免定义只有静态成员的类。
+    - avoid_classes_with_only_static_members
+    # 避免double和int的类型检查。
+    - avoid_double_and_int_checks
+    # 避免对dynamic对象进行方法调用。
+    - avoid_dynamic_calls
+    # 避免空的else语句。
+    - avoid_empty_else
+    # 非@immutable类避免重写==和hashCode。
+    - avoid_equals_and_hash_code_on_mutable_classes
+    # 通过转换引号避免内部引号转义。
+    - avoid_escaping_inner_quotes
+    # 避免在const类中使用字段初始化。
+    - avoid_field_initializers_in_const_classes
+    # 避免使用final参数声明。
+    - avoid_final_parameters
+    # 避免在forEach中使用函数字面量。
+    # - avoid_function_literals_in_foreach_calls
+    # 避免使用FutureOr作为返回类型。
+    # - avoid_futureor_void
+    # 不要实现重写==的类。
+    - avoid_implementing_value_types
+    # 不要显式初始化为null。
+    - avoid_init_to_null
+    # 避免JavaScript的取整问题。
+    # - avoid_js_rounded_ints
+    # 避免单行声明多个变量。
+    - avoid_multiple_declarations_per_line
+    # 自定义==运算符中避免null检查。
+    - avoid_null_checks_in_equality_operators
+    # 避免布尔类型的顺序参数。
+    - avoid_positional_boolean_parameters
+    # 生产代码避免使用print。
+    - avoid_print
+    # 避免私有类型定义函数。
+    - avoid_private_typedef_functions
+    # 避免冗余参数值。
+    - avoid_redundant_argument_values
+    # 避免相对路径导入lib文件。
+    - avoid_relative_lib_imports
+    # 不要重写方法参数名称。
+    - avoid_renaming_method_parameters
+    # setter避免返回类型。
+    - avoid_return_types_on_setters
+    # 基本类型返回值避免返回null。此规则在 Dart 3.3.0 中已被删除
+    # - avoid_returning_null
+    # Future返回值避免返回null。此规则在 Dart 3.3.0 中已被删除
+    # - avoid_returning_null_for_future
+    # void返回值避免返回null。
+    - avoid_returning_null_for_void
+    # 避免返回this实现流式接口。
+    - avoid_returning_this
+    # 避免只有setter没有getter。
+    - avoid_setters_without_getters
+    # 避免类型参数遮蔽。
+    - avoid_shadowing_type_parameters
+    # 避免在表达式语句中使用单联级。
+    - avoid_single_cascade_in_expression_statements
+    # 避免缓慢的异步IO操作。
+    - avoid_slow_async_io
+    # 生产环境避免使用.toString()。
+    - avoid_type_to_string
+    # 避免使用类型作为参数名。
+    - avoid_types_as_parameter_names
+    # 避免给闭包参数添加类型。
+    - avoid_types_on_closure_parameters
+    # 避免不必要的容器。
+    - avoid_unnecessary_containers
+    # 避免重写多次调用返回不同值的final字段。此规则已被删除。
+    # - avoid_unstable_final_fields
+    # 避免未使用的构造函数参数。
+    - avoid_unused_constructor_parameters
+    # 避免返回void的async函数。
+    - avoid_void_async
+    # Flutter非Web项目避免使用Web库。
+    - avoid_web_libraries_in_flutter
+    # 只await Futures对象。
+    - await_only_futures
+    # 扩展名使用大驼峰命名。
+    - camel_case_extensions
+    # 类型名使用大驼峰命名。
+    - camel_case_types
+    # 取消StreamSubscription实例。
+    - cancel_subscriptions
+    # 对同一对象使用级联调用。
+    - cascade_invocations
+    # 不要将可空类型强制转换为非空类型。
+    - cast_nullable_to_non_nullable
+    # 关闭Sink实例。
+    - close_sinks
+    # 集合方法调用使用不相关类型。
+    - collection_methods_unrelated_type
+    # 按字母顺序排列组合器。
+    - combinators_ordering
+    # 文档注释只引用作用域内标识符。
+    - comment_references
+    # 缺少条件导入。
+    - conditional_uri_does_not_exist
+    # 常量名使用小驼峰命名。
+    - constant_identifier_names
+    # finally块中避免控制流。
+    - control_flow_in_finally
+    # 流程控制结构使用大括号。
+    - curly_braces_in_flow_control_structures
+    # 库文档注释附加到库指令。
+    - dangling_library_doc_comments
+    # 依赖引用的包。
+    - depend_on_referenced_packages
+    # 缺少@deprecated标注。
+    - deprecated_consistency
+    # 避免使用同一包内的弃用成员。
+    - deprecated_member_use_from_same_package
+    # debug方法应包含所有公共属性。
+    # - diagnostic_describe_all_properties
+    # 遵循Effective Dart指令排序规范。
+    - directives_ordering
+    # 不要在非async块调用异步函数。
+    # - discarded_futures
+    # 不要使用环境声明变量。
+    - do_not_use_environment
+    # 需要文档说明忽略原因。
+    # - document_ignores
+    # 避免空catch块。
+    - empty_catches
+    # 空构造函数体使用分号。
+    - empty_constructor_bodies
+    # 避免空语句。
+    - empty_statements
+    # 使用健全的空安全。此规则在 Dart 3.0.0 中已被删除；
+    # - enable_null_safety
+    # 文件末尾保留换行符。
+    - eol_at_end_of_file
+    # 枚举类需要覆盖所有case。
+    - exhaustive_cases
+    # 文件名使用下划线小写格式。
+    - file_names
+    # 使用Flutter的TODO格式。
+    - flutter_style_todos
+    # 重写==时必须重写hashCode。
+    - hash_and_equals
+    # 不要导入其他包的实现文件。
+    - implementation_imports
+    # 显式拆解call方法。
+    - implicit_call_tearoffs
+    # 不要隐式重新打开类。
+    - implicit_reopen
+    # 使用Dart 3.0有效的case表达式。
+    - invalid_case_patterns
+    # 避免对JS互操作类型进行运行时检查。
+    - invalid_runtime_check_with_js_interop_types
+    # 条件表达式不应恒真/假。此规则在 Dart 3.0.0 中已被删除；
+    # - invariant_booleans
+    # 集合contains方法使用不相关类型。此规则在 Dart 3.0.0 中已被删除；
+    # - iterable_contains_unrelated_type
+    # 合并返回语句和赋值操作。
+    - join_return_with_assignment
+    # 多行字符串以换行开头。
+    - leading_newlines_in_multiline_strings
+    # 库注解附加到库指令。
+    - library_annotations
+    # 库名使用下划线小写格式。
+    - library_names
+    # 库前缀使用下划线小写格式。
+    - library_prefixes
+    # 公共API避免使用私有类型。
+    - library_private_types_in_public_api
+    # 避免超过80字符的行。
+    # - lines_longer_than_80_chars
+    # remove方法使用不相关类型。此规则在 Dart 3.0.0 中已被删除；
+    # - list_remove_unrelated_type
+    # 布尔表达式不要只包含字面量。
+    - literal_only_boolean_expressions
+    # 使用匹配的父类参数名。
+    - matching_super_parameters
+    # 文档注释代码块需要指定语言。
+    - missing_code_block_language_in_doc_comment
+    # 相邻字符串间需要空格。
+    - missing_whitespace_between_adjacent_strings
+    # 列表中避免使用相邻字符串。
+    - no_adjacent_strings_in_list
+    # switch不要使用default case。
+    - no_default_cases
+    # 不要重复的case值。
+    - no_duplicate_case_values
+    # 库前缀避免前导下划线。
+    - no_leading_underscores_for_library_prefixes
+    # 局部标识符避免前导下划线。
+    - no_leading_underscores_for_local_identifiers
+    # 不要用布尔字面量比较布尔表达式。
+    - no_literal_bool_comparisons
+    # createState中不要包含逻辑。
+    - no_logic_in_create_state
+    # 避免调用runtimeType.toString()。
+    - no_runtimeType_toString
+    # 不要自我赋值变量。
+    - no_self_assignments
+    # 不要使用通配符参数。
+    - no_wildcard_variable_uses
+    # 非常量标识符使用小驼峰命名。
+    - non_constant_identifier_names
+    # 无效的原始操作。
+    - noop_primitive_operations
+    # 不要对可空类型参数进行空检查。
+    - null_check_on_nullable_type_parameter
+    # 不要传递null作为闭包参数。
+    - null_closures
+    # 局部变量省略类型注解。
+    - omit_local_variable_types
+    # 省略明显的局部变量类型。
+    - omit_obvious_local_variable_types
+    # 省略明显的属性类型。
+    - omit_obvious_property_types
+    # 避免单成员抽象类。
+    - one_member_abstracts
+    # 只抛出Exception/Error子类。
+    - only_throw_errors
+    # 不要覆盖字段。
+    - overridden_fields
+    # 公共API需要文档注释。此 lint 已被删除
+    # - package_api_docs
+    # 包名使用下划线小写格式。
+    - package_names
+    # 库名前缀使用包名加路径。
+    - package_prefixed_library_names
+    # 不要重新分配函数参数。
+    # - parameter_assignments
+    # 使用相邻字符串连接字面量。
+    - prefer_adjacent_string_concatenation
+    # assert优先放在初始化列表。
+    - prefer_asserts_in_initializer_lists
+    # assert应包含提示信息。
+    - prefer_asserts_with_message
+    # assert条件使用布尔类型。此规则在 Dart 3.0.0 中已被删除.
+    # - prefer_bool_in_asserts
+    # 优先使用集合字面量。
+    - prefer_collection_literals
+    # 优先使用??=空值判断。
+    - prefer_conditional_assignment
+    # 优先使用const构造函数。
+    - prefer_const_constructors
+    # @immutable类声明const构造函数。
+    - prefer_const_constructors_in_immutables
+    # 优先使用const声明。
+    - prefer_const_declarations
+    # @immutable构造参数使用const字面量。
+    - prefer_const_literals_to_create_immutables
+    # 优先使用构造函数而非静态方法。
+    - prefer_constructors_over_static_methods
+    # 对List/String使用contains方法。
+    - prefer_contains
+    # 不需要转义时优先使用双引号。
+    # - prefer_double_quotes
+    # 包含单引号的字符串使用双引号。
+    - prefer_single_quotes
+    # 命名参数用=分隔默认值。
+    - prefer_equal_for_default_values
+    # 简短成员使用=>语法。
+    # - prefer_expression_function_bodies
+    # 私有字段尽可能使用final。
+    - prefer_final_fields
+    # foreach循环变量使用final。
+    - prefer_final_in_for_each
+    # 未重新赋值的局部变量使用final。
+    - prefer_final_locals
+    # 未重新赋值的参数使用final。
+    # - prefer_final_parameters
+    # 构建map时优先使用for元素。
+    - prefer_for_elements_to_map_fromIterable
+    # 仅应用函数时使用forEach。
+    - prefer_foreach
+    # 使用函数声明绑定名称。
+    - prefer_function_declarations_over_variables
+    # 优先使用泛型函数类型别名。
+    - prefer_generic_function_type_aliases
+    # 优先使用if元素而非条件表达式。
+    - prefer_if_elements_to_conditional_expressions
+    # 优先使用??运算符。
+    - prefer_if_null_operators
+    # 优先使用初始化形参。
+    - prefer_initializing_formals
+    # 内联列表项声明。
+    - prefer_inlined_adds
+    # 优先使用int字面量。
+    - prefer_int_literals
+    # 使用插值组合字符串。
+    - prefer_interpolation_to_compose_strings
+    # 使用isEmpty判断空集合。
+    - prefer_is_empty
+    # 使用isNotEmpty判断非空集合。
+    - prefer_is_not_empty
+    # 优先使用is!运算符。
+    - prefer_is_not_operator
+    # 对可迭代对象使用whereType。
+    - prefer_iterable_whereType
+    # 优先使用mixin。
+    - prefer_mixin
+    # 优先使用空安全方法调用。
+    - prefer_null_aware_method_calls
+    # 优先使用空安全运算符。
+    - prefer_null_aware_operators
+    # lib文件优先使用相对导入。
+    - prefer_relative_imports
+    # 优先使用展开集合。
+    - prefer_spread_collections
+    # 显式声明未初始化变量类型。
+    - prefer_typing_uninitialized_variables
+    # 使用void代替Null类型。
+    - prefer_void_to_null
+    # @Deprecated需要提供信息。
+    - provide_deprecation_message
+    # 公共成员需要文档注释。
+    - public_member_api_docs
+    # getter递归返回自身。
+    - recursive_getters
+    # 参数列表使用尾逗号。
+    - require_trailing_commas
+    # pubspec使用https链接。
+    - secure_pubspec_urls
+    # 空白区域使用SizedBox。
+    - sized_box_for_whitespace
+    # 使用SizedBox收缩/扩展构造。
+    - sized_box_shrink_expand
+    # 文档注释使用///。
+    - slash_for_doc_comments
+    # widget创建时child属性放最后。
+    - sort_child_properties_last
+    # 构造函数声明放在最前。
+    - sort_constructors_first
+    # pub依赖按字母排序。
+    - sort_pub_dependencies
+    # 无名构造函数声明最前。
+    - sort_unnamed_constructors_first
+    # 指定不明显的局部变量类型。
+    # - specify_nonobvious_local_variable_types
+    # 指定不明显的属性类型。
+    - specify_nonobvious_property_types
+    # 显式指定顶层类型推断。
+    # - strict_top_level_inference
+    # 构造函数初始化列表super放最后。此规则在 Dart 3.0.0 中已被删除；
+    # - super_goes_last
+    # ==运算符中测试参数类型。
+    - test_types_in_equals
+    # finally块中避免throw。
+    - throw_in_finally
+    # 严格化初始化形参类型。
+    - tighten_type_of_initializing_formals
+    # 公共API需要类型注解。
+    - type_annotate_public_apis
+    # 不要注解初始化形参类型。
+    - type_init_formals
+    # 常量模式中不要使用类型字面量。
+    - type_literal_in_constant_pattern
+    # 异步函数必须await或标记unawaited。
+    # - unawaited_futures
+    # 文档注释避免HTML标签。
+    - unintended_html_in_doc_comment
+    # 没有await就不要async。
+    - unnecessary_async
+    # return中避免不必要的await。
+    - unnecessary_await_in_return
+    # 字符串插值避免不必要的大括号。
+    - unnecessary_brace_in_string_interps
+    # 避免多余的break语句。
+    - unnecessary_breaks
+    # 避免不必要的const关键字。
+    - unnecessary_const
+    # 避免不必要的.new构造名。
+    - unnecessary_constructor_name
+    # 局部变量避免不必要的final。
+    # - unnecessary_final
+    # 避免不必要的getter/setter包装。
+    - unnecessary_getters_setters
+    # 不要忽略未产生的诊断代码。
+    # - unnecessary_ignore
+    # 优先使用拆解而非lambda。
+    - unnecessary_lambdas
+    # 不需要时避免late修饰符。
+    - unnecessary_late
+    # 没有文档的库避免库指令。
+    - unnecessary_library_directive
+    # 库声明中避免库名。
+    - unnecessary_library_name
+    # 避免不必要的new关键字。
+    - unnecessary_new
+    # 避免空感知赋值中的null。
+    - unnecessary_null_aware_assignments
+    # 可空类型的扩展避免空安全运算符。
+    - unnecessary_null_aware_operator_on_extension_on_nullable
+    # 避免不必要的空检查。
+    - unnecessary_null_checks
+    # ??运算符中避免null。
+    - unnecessary_null_in_if_null_operators
+    # 非空初始化的final变量使用非空类型。
+    - unnecessary_nullable_for_final_variable_declarations
+    # 避免不必要的父类方法调用重写。
+    - unnecessary_overrides
+    # 移除不必要的圆括号。
+    - unnecessary_parenthesis
+    # 避免不必要的原始字符串。
+    - unnecessary_raw_strings
+    # 避免不必要的语句。
+    - unnecessary_statements
+    # 移除字符串中不必要的转义。
+    - unnecessary_string_escapes
+    # 避免不必要的字符串插值。
+    - unnecessary_string_interpolations
+    # 避免不必要的this访问成员。
+    - unnecessary_this
+    # 展开集合时避免不必要的toList()。
+    - unnecessary_to_list_in_spreads
+    # 移除多余的变量下划线。
+    - unnecessary_underscores
+    # 可执行库中存在无法访问的顶层成员。
+    - unreachable_from_main
+    # 不同类型之间的相等性检查。
+    - unrelated_type_equality_checks
+    # 避免不安全的HTML API。此 lint 已弃用并将在将来的版本中删除
+    # - unsafe_html
+    # 泛型类型存在非协变位置的不安全使用。
+    - unsafe_variance
+    # 异步操作后避免跨异步间隙使用BuildContext。
+    - use_build_context_synchronously
+    # 使用ColoredBox代替Container设置颜色。
+    - use_colored_box
+    # 使用DecoratedBox实现装饰效果。
+    - use_decorated_box
+    # 优先使用枚举替代类似枚举的类。
+    - use_enums
+    # 使用8位十六进制值表示Flutter颜色。
+    - use_full_hex_values_for_flutter_colors
+    # 参数使用泛型函数类型语法。
+    - use_function_type_syntax_for_parameters
+    # 使用??将null转换为布尔值。
+    - use_if_null_to_convert_nulls_to_bools
+    # 使用isEven/isOdd代替%2判断奇偶。
+    - use_is_even_rather_than_modulo
+    # Widget构造函数中必须使用key参数。
+    - use_key_in_widget_constructors
+    # 对私有非空字段/变量使用late修饰。
+    - use_late_for_private_fields_and_variables
+    # 使用预定义的命名常量。
+    - use_named_constants
+    # 优先使用原始字符串避免转义。
+    - use_raw_strings
+    # 优先使用rethrow重新抛出异常。
+    - use_rethrow_when_possible
+    # 使用setter修改属性。
+    - use_setters_to_change_properties
+    # 使用StringBuffer组合字符串。
+    - use_string_buffers
+    # part指令中使用字符串引用。
+    - use_string_in_part_of_directives
+    # 优先使用super参数初始化。
+    - use_super_parameters
+    # 测试异常时使用throwsA匹配器。
+    - use_test_throws_matchers
+    # 方法名以to/as开头时应返回对应类型。
+    - use_to_and_as_if_applicable
+    # 使用整除运算符~/
+    - use_truncating_division
+    # 确保正则表达式语法有效。
+    - valid_regexps
+    # 不要给void类型赋值。
+    - void_checks

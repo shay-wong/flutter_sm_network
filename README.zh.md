@@ -17,7 +17,7 @@
 - [x] <span style="color: lightgreen;">支持 Json 解析</span>
 - [x] <span style="color: lightgreen;">支持打印日志到控制台</span>
 - [x] <span style="color: lightgreen;">支持打印错误信息到控制台</span>
-- [ ] <span style="color: #A9A9A9;">初始配置</span>
+- [x] <span style="color: #A9A9A9;">初始配置</span>
 - [ ] <span style="color: #A9A9A9;">支持日志写入文件缓存</span>
 
 ## 安装
