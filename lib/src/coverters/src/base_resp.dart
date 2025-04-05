@@ -28,8 +28,8 @@ class BaseResp<T> {
   /// 是否成功
   bool? status;
 
-  /// 是否成功
-  bool get isSuccess => status ?? false;
+  /// 是否成功, 默认 code == 200 成功
+  bool get isSuccess => status ?? code == 200;
 
   String get _jsonString => JsonEncoder.withIndent(
         Http.shared.options.log.tabStep,

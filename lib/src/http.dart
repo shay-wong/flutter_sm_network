@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 
-import 'intercaptors/debug_locat_interceptor.dart';
+import 'intercaptors/locat_interceptor.dart';
 import 'options.dart';
 
 /// 请求头
@@ -45,13 +45,15 @@ class Http {
 
   Http._();
 
-  /// dio
-  static late final Dio dio;
-
   static final _instance = Http._();
+
+  /// dio
+  static Dio get dio => _instance._dio;
 
   /// 单例
   static Http get shared => _instance;
+
+  late final Dio _dio;
 
   late HttpBaseOptions _options;
 
@@ -64,20 +66,34 @@ class Http {
   }
 
   /// 请求配置
-  void config({HttpBaseOptions? options, Iterable<Interceptor>? interceptors}) {
-    dio = Dio();
-    options ??= HttpBaseOptions();
-    this.options = options;
+  void config({
+    Dio? dio,
+    HttpBaseOptions? options,
+    Iterable<Interceptor>? interceptors,
+  }) {
+    _options = options ?? HttpBaseOptions();
+    _dio = dio ?? Dio(_options);
 
-    var contains = false;
+    LogcatInterceptor? logInterceptor;
     if (interceptors != null) {
-      dio.interceptors.addAll(interceptors);
-      contains = interceptors.any((element) => element is DebugLogcatInterceptor);
+      logInterceptor = interceptors.whereType<LogcatInterceptor>().lastOrNull;
+
+      _dio.interceptors.addAll(
+        interceptors.where(
+          (element) => element is! LogcatInterceptor,
+        ),
+      );
     }
 
     // 添加日志
-    if (!contains && this.options.log.enable) {
-      dio.interceptors.add(DebugLogcatInterceptor(log: options.log));
+    if (_options.log.enable) {
+      _dio.interceptors.add(
+        logInterceptor ??
+            LogcatInterceptor(
+              log: _options.log,
+              converterOptions: _options.converterOptions,
+            ),
+      );
     }
   }
 }

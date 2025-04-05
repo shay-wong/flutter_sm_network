@@ -4,12 +4,14 @@ import 'package:dio/dio.dart';
 
 import '../../http.dart';
 import 'base_resp.dart';
-import 'bool_converter.dart';
 import 'num_converter.dart';
 import 'string_converter.dart';
 
 /// json 数据转换
 typedef FromJsonT<T> = T Function(Parameters);
+
+/// 验证状态
+typedef ValidateT = bool Function(int? status, Parameters data);
 
 /// 数据处理器
 abstract class Converter<R extends BaseResp<T>, T> {
@@ -30,6 +32,17 @@ abstract class Converter<R extends BaseResp<T>, T> {
 
   /// 成功数据处理
   R success(Response response) => throw UnimplementedError();
+
+  /// 拷贝
+  Converter<R, T> copyWith({
+    FromJsonT<T>? fromJsonT,
+    ConverterOptions? options,
+  }) {
+    return DefaultConverter<R, T>(
+      fromJsonT: fromJsonT ?? this.fromJsonT,
+      options: options ?? this.options,
+    );
+  }
 }
 
 /// 转换选项
@@ -52,7 +65,7 @@ abstract class ConverterOptions {
   final String message;
 
   /// 状态
-  final String status;
+  final ValidateT? status;
 }
 
 /// 默认选项
@@ -62,7 +75,7 @@ class DefaultConverterOptions extends ConverterOptions {
     super.code = 'code',
     super.message = 'message',
     super.data = 'data',
-    super.status = 'status',
+    super.status,
   });
 }
 
@@ -75,8 +88,14 @@ class DefaultConverter<R extends BaseResp<T>, T> extends Converter<R, T> {
   });
 
   @override
-  R error(dynamic error) =>
-      BaseResp<T>(code: 400, status: false, message: const StringConverter().fromJson(error)) as R;
+  R error(
+    dynamic error, {
+    int? code,
+  }) =>
+      BaseResp<T>(
+        code: code ?? 400,
+        message: const StringConverter().fromJson(error),
+      ) as R;
 
   @override
   R exception(DioException exception) {
@@ -87,7 +106,10 @@ class DefaultConverter<R extends BaseResp<T>, T> extends Converter<R, T> {
         return _handleResponse(responseData);
       }
     }
-    return error(exception.error);
+    return error(
+      exception.error ?? exception.message ?? response?.statusMessage,
+      code: response?.statusCode,
+    );
   }
 
   @override
@@ -134,7 +156,6 @@ class DefaultConverter<R extends BaseResp<T>, T> extends Converter<R, T> {
     final code = const IntConverter().fromJson(responseData[options.code]);
     var data = responseData[options.data];
     final message = const StringConverter().fromJson(responseData[options.message]);
-    final status = const BoolConverter().fromJson(responseData[options.status]);
 
     List<T>? list;
     if (data is List) {
@@ -149,7 +170,7 @@ class DefaultConverter<R extends BaseResp<T>, T> extends Converter<R, T> {
       data: data,
       list: list,
       message: message,
-      status: status,
+      status: options.status?.call(code, responseData),
     ) as R;
   }
 }

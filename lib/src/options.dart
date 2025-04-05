@@ -4,17 +4,6 @@ import 'coverters/converter.dart';
 import 'http.dart';
 import 'log.dart';
 
-/// 基础选项
-abstract class HttpCommonOptionsMixin<R extends BaseResp<T>, T> {
-  // ignore: public_member_api_docs
-  HttpCommonOptionsMixin({
-    required this.converter,
-  });
-
-  /// 转换
-  final Converter<R, T>? converter;
-}
-
 /// 基础配置
 class HttpBaseOptions<R extends BaseResp<T>, T> extends BaseOptions
     implements HttpCommonOptionsMixin<R, T> {
@@ -44,13 +33,24 @@ class HttpBaseOptions<R extends BaseResp<T>, T> extends BaseOptions
     this.converter,
   }) : super(method: method?.name);
 
-  /// 是否打印日志
-  final HttpLog log;
-
   /// 转换选项
   final ConverterOptions converterOptions;
 
+  /// 是否打印日志
+  final HttpLog log;
+
   @override
+  final Converter<R, T>? converter;
+}
+
+/// 基础选项
+abstract class HttpCommonOptionsMixin<R extends BaseResp<T>, T> {
+  // ignore: public_member_api_docs
+  HttpCommonOptionsMixin({
+    required this.converter,
+  });
+
+  /// 转换
   final Converter<R, T>? converter;
 }
 
@@ -87,6 +87,9 @@ class HttpOptions<R extends BaseResp<T>, T> extends Options
 
 /// 参数混入
 mixin HttpOptionsMixin<R extends BaseResp<T>, T> {
+  /// 取消 Token
+  CancelToken? get cancelToken => null;
+
   /// Content-Type
   ContentType? get contentType => null;
 
@@ -98,6 +101,9 @@ mixin HttpOptionsMixin<R extends BaseResp<T>, T> {
 
   /// 请求体数据 默认 null
   Object? get data => null;
+
+  /// dio
+  Dio get dio => Http.dio;
 
   /// 额外参数
   Parameters? get extra => null;
@@ -119,6 +125,12 @@ mixin HttpOptionsMixin<R extends BaseResp<T>, T> {
 
   /// 请求方式 默认 GET
   Method? get method => null;
+
+  /// 接收进度
+  ProgressCallback? get onReceiveProgress => null;
+
+  /// 上传进度
+  ProgressCallback? get onSendProgress => null;
 
   /// 请求配置
   HttpOptions<R, T>? get options => HttpOptions<R, T>(
@@ -173,13 +185,4 @@ mixin HttpOptionsMixin<R extends BaseResp<T>, T> {
 
   /// 请求状态校验
   ValidateStatus? get validateStatus => null;
-
-  /// 取消 Token
-  CancelToken? get cancelToken => null;
-
-  /// 接收进度
-  ProgressCallback? get onReceiveProgress => null;
-
-  /// 上传进度
-  ProgressCallback? get onSendProgress => null;
 }

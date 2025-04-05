@@ -1,7 +1,5 @@
 // ignore_for_file: avoid_print, unreachable_from_main
 
-import 'dart:io' show HttpHeaders;
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sm_network/sm_network.dart';
 
@@ -17,13 +15,13 @@ void main() {
       receiveTimeout: const Duration(seconds: 5),
       validateStatus: (status) => status != null && status == 200,
       headers: {
-        HttpHeaders.userAgentHeader: 'net',
+        'user-agent': 'sm_network',
         'common-header': 'xx',
-        Headers.acceptHeader: 'application/json',
+        'accept': 'application/json',
       },
       log: HttpLog(error: (error, stackTrace) => print('$error\n$stackTrace')),
       // ignore: avoid_redundant_argument_values
-      converterOptions: const DefaultConverterOptions(
+      converterOptions: DefaultConverterOptions(
         // ignore: avoid_redundant_argument_values
         code: 'code',
         // ignore: avoid_redundant_argument_values
@@ -31,12 +29,13 @@ void main() {
         // ignore: avoid_redundant_argument_values
         message: 'message',
         // ignore: avoid_redundant_argument_values
-        status: 'status',
+        status: (status, data) => status == 1,
       ),
     ),
     interceptors: [
       // 模拟网络请求，返回 extra 中的数据
       MockInterceptor(),
+      LogcatInterceptor(),
     ],
   );
 
@@ -62,21 +61,34 @@ void main() {
     final response = await GetObjsSession().request();
     print(response);
   });
+  test('GetPageableSession', () async {
+    final response = await GetPageableSession().request();
+    print(response);
+    final response1 = await GetPageableSession(pageNumber: 2).request();
+    print(response1);
+  });
+
   test('GetErrorSession', () async {
     final response = await GetErrorSession().request();
     print(response);
   });
 
   test('ContentTypeSession', () async {
-    final resp =
+    final response =
         // ignore: avoid_redundant_argument_values
         await ContentTypeSession(contentType: ContentType.raw, data: 'Hello World').request();
-    print(resp);
-    final resp1 = await ContentTypeSession(contentType: ContentType.json).request();
-    print(resp1);
-    final resp2 = await ContentTypeSession(contentType: ContentType.multipart).request();
-    print(resp2);
-    final resp3 = await ContentTypeSession(contentType: ContentType.urlencoded).request();
-    print(resp3);
+    print(response);
+    final response1 = await ContentTypeSession(contentType: ContentType.json).request();
+    print(response1);
+    final response2 = await ContentTypeSession(contentType: ContentType.multipart).request();
+    print(response2);
+    final response3 = await ContentTypeSession(contentType: ContentType.urlencoded).request();
+    print(response3);
+  });
+  test('TimeoutSession', () async {
+    final response = await TimeoutSession().request();
+    print(response);
+    final response1 = await TimeoutSession().request();
+    print(response1);
   });
 }

@@ -63,3 +63,41 @@ class MockInterceptor extends Interceptor {
     super.onRequest(options, handler);
   }
 }
+
+class TimeoutInterceptor extends Interceptor {
+  @override
+  void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
+    handler.next(options);
+    // 延迟请求，模拟超时
+    // Future.delayed(const Duration(seconds: 2)).then((_) {
+    // 正常继续请求
+    // 或者直接抛出超时异常
+    // handler.reject(
+    //   DioException.connectionTimeout(
+    //     timeout: const Duration(seconds: 1),
+    //     requestOptions: options,
+    //     error: 'connection timeout',
+    //   ),
+    //   true,
+    // );
+    // });
+  }
+
+  @override
+  void onResponse(Response response, ResponseInterceptorHandler handler) {
+    // 延迟请求，模拟超时
+    Future.delayed(const Duration(seconds: 2)).then((_) {
+      // 正常继续请求
+      // handler.next(options);
+      // 或者直接抛出超时异常
+      handler.reject(
+        DioException.receiveTimeout(
+          timeout: const Duration(seconds: 1),
+          requestOptions: response.requestOptions,
+          error: 'receive timeout',
+        ),
+        true,
+      );
+    });
+  }
+}
