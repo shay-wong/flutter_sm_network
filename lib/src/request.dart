@@ -232,7 +232,7 @@ mixin RequestMixin<R extends BaseResp<T>, T> on HttpOptionsMixin<R, T>
         }
       }
 
-      final response = await Http.dio.request<E>(
+      final response = await dio.request<E>(
         path ?? '',
         data: data,
         queryParameters: queryParameters,
@@ -263,14 +263,6 @@ mixin RequestMixin<R extends BaseResp<T>, T> on HttpOptionsMixin<R, T>
     } on DioException {
       rethrow;
     } catch (e) {
-      StackTrace? stackTrace;
-      if (e is Error) {
-        stackTrace = e.stackTrace;
-      }
-      Http.shared.options.log.error(
-        'path: $path \nError: $e',
-        stackTrace ?? StackTrace.current,
-      );
       rethrow;
     }
   }
@@ -502,6 +494,14 @@ mixin RequestMixin<R extends BaseResp<T>, T> on HttpOptionsMixin<R, T>
     } on DioException catch (e) {
       return converter.exception(e);
     } catch (e) {
+      StackTrace? stackTrace;
+      if (e is Error) {
+        stackTrace = e.stackTrace;
+      }
+      Http.shared.options.log.error(
+        'path: ${path ?? this.path} \nError: $e',
+        stackTrace ?? StackTrace.current,
+      );
       return converter.error(e);
     }
   }
