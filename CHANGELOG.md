@@ -1,5 +1,9 @@
 # sm_network
 
+## 1.1.0
+
+* refactor, requires adaptation
+
 ## 1.0.0
 
 * refactor, requires adaptation
