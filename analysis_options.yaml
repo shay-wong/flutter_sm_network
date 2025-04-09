@@ -14,7 +14,7 @@ linter:
     # 声明方法返回类型。
     - always_declare_return_types
     # 将控制结构表达式与其语句分开。
-    - always_put_control_body_on_new_line
+    # - always_put_control_body_on_new_line
     # 将必需的命名参数放在前面。
     - always_put_required_named_parameters_first
     # 对没有默认值的命名参数标记@required。

@@ -1,5 +1,9 @@
 # sm_network
 
+## 1.1.1
+
+* Compatible with Flutter 3.24.5 version
+
 ## 1.1.0
 
 * refactor, requires adaptation
