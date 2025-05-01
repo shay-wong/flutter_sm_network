@@ -91,7 +91,7 @@ mixin HttpOptionsMixin<R extends BaseResp<T>, T> {
   CancelToken? get cancelToken => null;
 
   /// Content-Type
-  ContentType? get contentType => null;
+  ContentType? get contentType => files != null ? ContentType.multipart : null;
 
   /// 数据转换
   Converter<R, T> get converter => DefaultConverter<R, T>(
@@ -101,6 +101,11 @@ mixin HttpOptionsMixin<R extends BaseResp<T>, T> {
 
   /// 请求体数据 默认 null
   Object? get data => null;
+
+  /// 上传文件
+  /// [files] 的 `value` 必须是 [MultipartFile]
+  /// 当使用 [files] 文件上传时, [data] 必须是 [Parameters]
+  FormFiles? get files => null;
 
   /// dio
   Dio get dio => Http.dio;

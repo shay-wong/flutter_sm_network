@@ -9,6 +9,9 @@ typedef HTTPHeaders = Parameters;
 /// 参数
 typedef Parameters = Map<String, dynamic>;
 
+/// 表单文件
+typedef FormFiles = Map<String, MultipartFile>;
+
 /// 请求体
 enum ContentType {
   /// 原始

@@ -223,6 +223,14 @@ mixin RequestMixin<R extends BaseResp<T>, T> on HttpOptionsMixin<R, T>
     onReceiveProgress ??= this.onReceiveProgress;
 
     try {
+      if (contentType == ContentType.multipart && files != null) {
+        data ??= Parameters.from({});
+        if (data is Parameters) {
+          data = Parameters.from(data)..addAll(files!);
+        } else {
+          throw ArgumentError('data must be Parameters when files is not null');
+        }
+      }
       // 处理请求体
       if (data != null) {
         if (contentType == ContentType.json) {
