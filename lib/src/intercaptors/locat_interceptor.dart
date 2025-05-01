@@ -379,10 +379,10 @@ class LogcatInterceptor extends Interceptor {
             ..writeAll(
               [
                 ...data.fields.map(
-                  (e) => '${_indent()}--form ${e.key}="${e.value}"',
+                  (e) => '${_indent()}--form \'${e.key}="${e.value}"\'',
                 ),
                 ...data.files.map(
-                  (e) => '${_indent()}--form =@"${e.value.filename}"',
+                  (e) => '${_indent()}--form \'${e.key}=@"${e.value.filename}"\'',
                 ),
               ],
               _separator,

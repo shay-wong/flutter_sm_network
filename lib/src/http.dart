@@ -74,25 +74,32 @@ class Http {
     _options = options ?? HttpBaseOptions();
     _dio = dio ?? Dio(_options);
 
-    LogcatInterceptor? logInterceptor;
+    var logInterceptorIndex = -1;
     if (interceptors != null) {
-      logInterceptor = interceptors.whereType<LogcatInterceptor>().lastOrNull;
-
-      _dio.interceptors.addAll(
-        interceptors.where(
-          (element) => element is! LogcatInterceptor,
-        ),
-      );
+      final inters = interceptors.toList();
+      logInterceptorIndex = inters.lastIndexWhere((e) => e is LogcatInterceptor);
+      if (logInterceptorIndex != -1) {
+        final filtered = inters
+            .asMap()
+            .entries
+            .where((entry) {
+              final index = entry.key;
+              final value = entry.value;
+              return value is! LogcatInterceptor || index == logInterceptorIndex;
+            })
+            .map((e) => e.value)
+            .toList();
+        _dio.interceptors.addAll(filtered);
+      }
     }
 
     // 添加日志
-    if (_options.log.enable) {
+    if (_options.log.enable && logInterceptorIndex == -1) {
       _dio.interceptors.add(
-        logInterceptor ??
-            LogcatInterceptor(
-              log: _options.log,
-              converterOptions: _options.converterOptions,
-            ),
+        LogcatInterceptor(
+          log: _options.log,
+          converterOptions: _options.converterOptions,
+        ),
       );
     }
   }
