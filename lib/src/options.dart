@@ -28,10 +28,11 @@ class HttpBaseOptions<R extends BaseResp<T>, T> extends BaseOptions
     super.requestEncoder,
     super.responseDecoder,
     super.listFormat,
-    this.log = const HttpLog(),
+    HttpLog? log,
     this.converterOptions = const DefaultConverterOptions(),
     this.converter,
-  }) : super(method: method?.name);
+  })  : log = log ?? const HttpLog(),
+        super(method: method?.methodName);
 
   /// 转换选项
   final ConverterOptions converterOptions;
@@ -77,7 +78,7 @@ class HttpOptions<R extends BaseResp<T>, T> extends Options
     super.listFormat,
     this.converter,
   }) : super(
-          method: method?.name,
+          method: method?.methodName,
           contentType: contentType?.value,
         );
 
@@ -91,7 +92,7 @@ mixin HttpOptionsMixin<R extends BaseResp<T>, T> {
   CancelToken? get cancelToken => null;
 
   /// Content-Type
-  ContentType? get contentType => files != null ? ContentType.multipart : null;
+  ContentType? get contentType => null;
 
   /// 数据转换
   Converter<R, T> get converter => DefaultConverter<R, T>(
@@ -102,16 +103,25 @@ mixin HttpOptionsMixin<R extends BaseResp<T>, T> {
   /// 请求体数据 默认 null
   Object? get data => null;
 
-  /// 上传文件
-  /// [files] 的 `value` 必须是 [MultipartFile]
-  /// 当使用 [files] 文件上传时, [data] 必须是 [Parameters]
-  FormFiles? get files => null;
+  /// 发生错误时是否删除文件
+  /// 默认为 true
+  /// 非 [Method.download] 时无效
+  bool? get deleteOnError => null;
 
   /// dio
   Dio get dio => Http.dio;
 
   /// 额外参数
   Parameters? get extra => null;
+
+  /// 下载文件时的文件访问模式
+  /// 非 [Method.download] 时无效
+  FileAccessMode? get fileAccessMode => null;
+
+  /// 上传文件
+  /// [files] 的 `value` 必须是 [MultipartFile]
+  /// 当使用 [files] 文件上传时, [data] 必须是 [Parameters]
+  FormFiles? get files => null;
 
   /// 跟随重定向
   bool? get followRedirects => null;
@@ -121,6 +131,10 @@ mixin HttpOptionsMixin<R extends BaseResp<T>, T> {
 
   /// 请求头 默认 null
   HTTPHeaders? get headers => null;
+
+  /// 原始文件的实际大小（未压缩）。
+  /// 非 [Method.download] 时无效
+  String? get lengthHeader => null;
 
   /// 数组格式
   ListFormat? get listFormat => null;
@@ -184,6 +198,10 @@ mixin HttpOptionsMixin<R extends BaseResp<T>, T> {
 
   /// 响应类型
   ResponseType? get responseType => null;
+
+  /// 文件保存路径
+  /// 非 [Method.download] 时无效
+  dynamic get savePath => null;
 
   /// 发送超时时间
   Duration? get sendTimeout => null;

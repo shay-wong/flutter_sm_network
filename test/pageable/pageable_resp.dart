@@ -18,11 +18,11 @@ class PageableResp<T> extends BaseResp<T> {
   /// 当前页
   int? pageNumber;
 
-  /// 总页数
-  int? pages;
-
   /// 每页的数量
   int? pageSize;
+
+  /// 总页数
+  int? pages;
 
   /// 总记录数
   int? total;

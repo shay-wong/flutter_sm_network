@@ -46,13 +46,18 @@ abstract class PageableSession<T> extends RawSession<PageableResp<T>, T> {
   @override
   Future<Response<E>> fetch<E>({
     String? path,
+    dynamic savePath,
     Method? method,
     Object? data,
+    FormFiles? files,
     Parameters? queryParameters,
     CancelToken? cancelToken,
     HttpOptions<PageableResp<T>, T>? options,
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
+    bool? deleteOnError,
+    FileAccessMode? fileAccessMode,
+    String? lengthHeader,
   }) {
     data ??= this.data;
 
@@ -64,13 +69,18 @@ abstract class PageableSession<T> extends RawSession<PageableResp<T>, T> {
 
     return super.fetch(
       path: path,
+      savePath: savePath,
       method: method,
       data: data,
+      files: files,
       queryParameters: queryParameters,
       cancelToken: cancelToken,
       options: options,
       onSendProgress: onSendProgress,
       onReceiveProgress: onReceiveProgress,
+      deleteOnError: deleteOnError,
+      fileAccessMode: fileAccessMode,
+      lengthHeader: lengthHeader,
     );
   }
 }

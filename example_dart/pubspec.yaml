@@ -1,0 +1,17 @@
+name: example_dart
+description: A sample command-line application.
+version: 1.0.0
+publish_to: none
+# repository: https://github.com/my_org/my_repo
+
+environment:
+  sdk: ^3.5.4
+
+# Add regular dependencies here.
+dependencies:
+  sm_network:
+    path: ../
+
+dev_dependencies:
+  lints: ^5.1.1
+  test: ^1.25.15

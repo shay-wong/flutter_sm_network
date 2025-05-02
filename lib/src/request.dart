@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:dio/dio.dart';
 
@@ -7,6 +6,7 @@ import 'coverters/converter.dart';
 import 'error.dart';
 import 'http.dart';
 import 'options.dart';
+import 'utils.dart';
 
 /// 请求接口
 abstract class RequestMethod<R extends BaseResp<T>, T> {
@@ -27,17 +27,107 @@ abstract class RequestMethod<R extends BaseResp<T>, T> {
     CancelToken? cancelToken,
   });
 
+  /// {@template dio.Dio.download}
+  /// Download the file and save it in local. The default http method is "GET",
+  /// you can custom it by [Options.method].
+  ///
+  /// [path] is the file url.
+  ///
+  /// The file will be saved to the path specified by [savePath].
+  /// The following two types are accepted:
+  /// 1. `String`: A path, eg "xs.jpg"
+  /// 2. `FutureOr<String> Function(Headers headers)`, for example:
+  ///    ```dart
+  ///    await dio.download(
+  ///      url,
+  ///      (Headers headers) {
+  ///        // Extra info: redirect counts
+  ///        print(headers.value('redirects'));
+  ///        // Extra info: real uri
+  ///        print(headers.value('uri'));
+  ///        // ...
+  ///        return (await getTemporaryDirectory()).path + 'file_name';
+  ///      },
+  ///    );
+  ///    ```
+  ///
+  /// [onReceiveProgress] is the callback to listen downloading progress.
+  /// Please refer to [ProgressCallback].
+  ///
+  /// [deleteOnError] whether delete the file when error occurs.
+  /// The default value is `true`.
+  ///
+  /// [fileAccessMode]
+  /// {@macro dio.options.FileAccessMode}
+  ///
+  /// [lengthHeader] : The real size of original file (not compressed).
+  /// When file is compressed:
+  /// 1. If this value is 'content-length', the `total` argument of
+  ///    [onReceiveProgress] will be -1.
+  /// 2. If this value is not 'content-length', maybe a custom header indicates
+  ///    the original file size, the `total` argument of [onReceiveProgress]
+  ///    will be this header value.
+  ///
+  /// You can also disable the compression by specifying the 'accept-encoding'
+  /// header value as '*' to assure the value of `total` argument of
+  /// [onReceiveProgress] is not -1. For example:
+  ///
+  /// ```dart
+  /// await dio.download(
+  ///   url,
+  ///   (await getTemporaryDirectory()).path + 'flutter.svg',
+  ///   options: Options(
+  ///     headers: {HttpHeaders.acceptEncodingHeader: '*'}, // Disable gzip
+  ///   ),
+  ///   onReceiveProgress: (received, total) {
+  ///     if (total <= 0) return;
+  ///     print('percentage: ${(received / total * 100).toStringAsFixed(0)}%');
+  ///   },
+  /// );
+  /// ```
+  /// {@endtemplate}
+  Future<R> download({
+    String? path,
+    dynamic savePath,
+    Object? data,
+    Map<String, dynamic>? queryParameters,
+    HttpOptions<R, T>? options,
+    CancelToken? cancelToken,
+    ProgressCallback? onReceiveProgress,
+    bool? deleteOnError,
+    FileAccessMode? fileAccessMode,
+    String? lengthHeader,
+  });
+
+  /// {@macro dio.Dio.download}
+  Future<R> downloadUri({
+    Uri? uri,
+    dynamic savePath,
+    Object? data,
+    HttpOptions<R, T>? options,
+    CancelToken? cancelToken,
+    ProgressCallback? onReceiveProgress,
+    bool? deleteOnError,
+    FileAccessMode? fileAccessMode,
+    String? lengthHeader,
+  });
+
   /// The eventual method to submit requests. All callers for requests should
   /// eventually go through this method.
   Future<Response<E>> fetch<E>({
     String? path,
+    dynamic savePath,
     Method? method,
     Object? data,
+    FormFiles? files,
     Parameters? queryParameters,
     CancelToken? cancelToken,
     HttpOptions<R, T>? options,
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
+    bool? deleteOnError,
+    FileAccessMode? fileAccessMode,
+    String? lengthHeader,
   });
 
   /// Convenience method to make an HTTP GET request.
@@ -142,22 +232,57 @@ abstract class RequestMethod<R extends BaseResp<T>, T> {
   /// Make HTTP request with options.
   Future<R> request({
     String? path,
+    dynamic savePath,
     Method? method,
     Object? data,
+    FormFiles? files,
     Parameters? queryParameters,
     CancelToken? cancelToken,
     HttpOptions<R, T>? options,
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
+    Converter<R, T>? converter,
+    bool? deleteOnError,
+    FileAccessMode? fileAccessMode,
+    String? lengthHeader,
   });
 
   /// Make http request with options with [Uri].
   Future<R> requestUri({
     Uri? uri,
+    dynamic savePath,
     Method? method,
     Object? data,
+    FormFiles? files,
     CancelToken? cancelToken,
     HttpOptions<R, T>? options,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+    Converter<R, T>? converter,
+    bool? deleteOnError,
+    FileAccessMode? fileAccessMode,
+    String? lengthHeader,
+  });
+
+  /// Convenience method to make an HTTP upload file request
+  Future<R> upload({
+    String? path,
+    Parameters? fields,
+    FormFiles? files,
+    Parameters? queryParameters,
+    HttpOptions<R, T>? options,
+    CancelToken? cancelToken,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  });
+
+  /// Convenience method to make an HTTP upload file request with [Uri].
+  Future<R> uploadUri({
+    Uri? uri,
+    Parameters? fields,
+    FormFiles? files,
+    HttpOptions<R, T>? options,
+    CancelToken? cancelToken,
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
   });
@@ -166,6 +291,8 @@ abstract class RequestMethod<R extends BaseResp<T>, T> {
 /// 请求混入
 mixin RequestMixin<R extends BaseResp<T>, T> on HttpOptionsMixin<R, T>
     implements RequestMethod<R, T> {
+  Utils get _utils => Utils.shared;
+
   @override
   Future<R> delete({
     String? path,
@@ -200,58 +327,129 @@ mixin RequestMixin<R extends BaseResp<T>, T> on HttpOptionsMixin<R, T>
     );
   }
 
+  @override
+  Future<R> download({
+    String? path,
+    dynamic savePath,
+    ProgressCallback? onReceiveProgress,
+    Map<String, dynamic>? queryParameters,
+    CancelToken? cancelToken,
+    bool? deleteOnError,
+    FileAccessMode? fileAccessMode,
+    String? lengthHeader,
+    Object? data,
+    HttpOptions<R, T>? options,
+  }) {
+    return request(
+      method: Method.download,
+      path: path,
+      savePath: savePath,
+      onReceiveProgress: onReceiveProgress,
+      queryParameters: queryParameters,
+      cancelToken: cancelToken,
+      deleteOnError: deleteOnError,
+      fileAccessMode: fileAccessMode,
+      lengthHeader: lengthHeader,
+      data: data,
+      options: options,
+    );
+  }
+
+  @override
+  Future<R> downloadUri({
+    Uri? uri,
+    dynamic savePath,
+    ProgressCallback? onReceiveProgress,
+    CancelToken? cancelToken,
+    bool? deleteOnError,
+    FileAccessMode? fileAccessMode,
+    String? lengthHeader,
+    Object? data,
+    HttpOptions<R, T>? options,
+  }) {
+    return requestUri(
+      method: Method.download,
+      uri: uri,
+      savePath: savePath,
+      onReceiveProgress: onReceiveProgress,
+      cancelToken: cancelToken,
+      deleteOnError: deleteOnError,
+      fileAccessMode: fileAccessMode,
+      lengthHeader: lengthHeader,
+      data: data,
+      options: options,
+    );
+  }
+
   /// [method] 方法名，[options] 中的 [method] 优先级最高
   @override
   Future<Response<E>> fetch<E>({
     String? path,
+    dynamic savePath,
     Method? method,
     Object? data,
+    FormFiles? files,
     Parameters? queryParameters,
     CancelToken? cancelToken,
     HttpOptions<R, T>? options,
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
+    bool? deleteOnError,
+    FileAccessMode? fileAccessMode,
+    String? lengthHeader,
   }) async {
-    path ??= this.path;
+    path ??= this.path ?? '';
+    savePath ??= this.savePath ?? '';
     method ??= this.method;
     data ??= this.data;
+    files ??= this.files;
     queryParameters ??= parameters;
     options ??= this.options;
-    options?.method ??= method?.name;
+    options?.method ??= method?.methodName;
     cancelToken ??= this.cancelToken;
     onSendProgress ??= this.onSendProgress;
     onReceiveProgress ??= this.onReceiveProgress;
+    // 处理 download 默认值
+    deleteOnError ??= this.deleteOnError ?? true;
+    fileAccessMode ??= this.fileAccessMode ?? FileAccessMode.write;
+    lengthHeader ??= this.lengthHeader ?? Headers.contentLengthHeader;
 
     try {
-      if (contentType == ContentType.multipart && files != null) {
-        data ??= Parameters.from({});
-        if (data is Parameters) {
-          data = Parameters.from(data)..addAll(files!);
-        } else {
-          throw ArgumentError('data must be Parameters when files is not null');
-        }
-      }
-      // 处理请求体
-      if (data != null) {
-        if (contentType == ContentType.json) {
-          data = jsonEncode(data);
-        } else if (contentType == ContentType.multipart && data is Parameters) {
-          data = FormData.fromMap(data);
-        }
-      }
-
-      final response = await dio.request<E>(
-        path ?? '',
+      data = _utils.processData(
         data: data,
-        queryParameters: queryParameters,
-        cancelToken: cancelToken,
-        options: options,
-        onSendProgress: onSendProgress,
-        onReceiveProgress: onReceiveProgress,
+        files: files,
+        contentType: contentType,
       );
 
+      Response response;
+
+      if (method == Method.download) {
+        response = await dio.download(
+          path,
+          savePath,
+          onReceiveProgress: onReceiveProgress,
+          queryParameters: queryParameters,
+          cancelToken: cancelToken,
+          deleteOnError: deleteOnError,
+          fileAccessMode: fileAccessMode,
+          lengthHeader: lengthHeader,
+          data: data,
+          options: options,
+        );
+      } else {
+        response = await dio.request<E>(
+          path,
+          data: data,
+          queryParameters: queryParameters,
+          cancelToken: cancelToken,
+          options: options,
+          onSendProgress: onSendProgress,
+          onReceiveProgress: onReceiveProgress,
+        );
+      }
+
       if (response.requestOptions.validateStatus(response.statusCode)) {
-        return response;
+        return response as Response<E>;
       } else {
         final message = 'statusCode: ${response.statusCode}, service error(validate failed)';
         final exception = DioException(
@@ -476,27 +674,37 @@ mixin RequestMixin<R extends BaseResp<T>, T> on HttpOptionsMixin<R, T>
   @override
   Future<R> request({
     String? path,
+    dynamic savePath,
     Method? method,
     Object? data,
+    FormFiles? files,
     Parameters? queryParameters,
     CancelToken? cancelToken,
     HttpOptions<R, T>? options,
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
     Converter<R, T>? converter,
+    bool? deleteOnError,
+    FileAccessMode? fileAccessMode,
+    String? lengthHeader,
   }) async {
     converter ??= this.converter;
 
     try {
       final response = await fetch(
         path: path,
+        savePath: savePath,
         method: method,
         data: data,
+        files: files,
         queryParameters: queryParameters,
         cancelToken: cancelToken,
         options: options,
         onSendProgress: onSendProgress,
         onReceiveProgress: onReceiveProgress,
+        deleteOnError: deleteOnError,
+        fileAccessMode: fileAccessMode,
+        lengthHeader: lengthHeader,
       );
       return converter.success(response);
     } on DioException catch (e) {
@@ -517,19 +725,76 @@ mixin RequestMixin<R extends BaseResp<T>, T> on HttpOptionsMixin<R, T>
   @override
   Future<R> requestUri({
     Uri? uri,
+    dynamic savePath,
     Method? method,
     Object? data,
+    FormFiles? files,
     CancelToken? cancelToken,
     HttpOptions<R, T>? options,
     ProgressCallback? onSendProgress,
     ProgressCallback? onReceiveProgress,
+    Converter<R, T>? converter,
+    bool? deleteOnError,
+    FileAccessMode? fileAccessMode,
+    String? lengthHeader,
   }) {
     return request(
       path: uri?.toString(),
+      savePath: savePath,
       method: method,
       data: data,
+      files: files,
       cancelToken: cancelToken,
       options: options,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+      converter: converter,
+      deleteOnError: deleteOnError,
+      fileAccessMode: fileAccessMode,
+      lengthHeader: lengthHeader,
+    );
+  }
+
+  @override
+  Future<R> upload({
+    String? path,
+    Parameters? fields,
+    FormFiles? files,
+    Parameters? queryParameters,
+    HttpOptions<R, T>? options,
+    CancelToken? cancelToken,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) {
+    return request(
+      method: Method.upload,
+      path: path,
+      data: fields,
+      files: files,
+      queryParameters: queryParameters,
+      options: options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+  }
+
+  @override
+  Future<R> uploadUri({
+    Uri? uri,
+    Parameters? fields,
+    FormFiles? files,
+    HttpOptions<R, T>? options,
+    CancelToken? cancelToken,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) {
+    return requestUri(
+      uri: uri,
+      data: fields,
+      files: files,
+      options: options,
+      cancelToken: cancelToken,
       onSendProgress: onSendProgress,
       onReceiveProgress: onReceiveProgress,
     );

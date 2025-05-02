@@ -1,6 +1,7 @@
 import 'dart:convert';
 
-import '../../http.dart';
+import '../../../sm_network.dart';
+import '../../extension.dart';
 
 /// 基础模型
 class BaseResp<T> {
@@ -31,11 +32,21 @@ class BaseResp<T> {
   /// 是否成功, 默认 code == 200 成功
   bool get isSuccess => status ?? code == 200;
 
-  String get _jsonString => JsonEncoder.withIndent(
+  String get _jsonString {
+    try {
+      final json = toJson();
+      if (data != null && data is ResponseBody) {
+        json['data'] = (data! as ResponseBody).toJson();
+      } else {
+        json['data'] = data.toString();
+      }
+      return JsonEncoder.withIndent(
         Http.shared.options.log.tabStep,
-      ).convert(
-        toJson(),
-      );
+      ).convert(json);
+    } catch (e) {
+      return toJson().toString();
+    }
+  }
 
   // ignore: public_member_api_docs
   Map<String, dynamic> toJson() => <String, dynamic>{

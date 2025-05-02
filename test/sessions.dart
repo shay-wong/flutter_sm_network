@@ -6,6 +6,25 @@ import 'mock_interceptor.dart';
 import 'models.dart';
 import 'pageable/pageable_session.dart';
 
+class ContentTypeSession extends Session with HttpMockAdapter {
+  ContentTypeSession({
+    this.contentType = ContentType.raw,
+    this.data = const {'name': 'Shay', 'age': 18},
+  });
+
+  @override
+  ContentType? contentType;
+
+  @override
+  Object? data;
+
+  @override
+  String? get path => '/contentType';
+
+  @override
+  Object? get responseData => data;
+}
+
 class GetErrorSession extends Session<String> with HttpMockAdapter {
   @override
   String get path => '/getError';
@@ -65,69 +84,40 @@ class GetObjsSession extends Session<Person> with HttpMockAdapter {
       ];
 }
 
-class GetStringSession extends Session<String> with HttpMockAdapter {
-  GetStringSession();
-
-  @override
-  String get path => '/getString';
-
-  @override
-  String? get responseData => 'Hello World!';
-}
-
-class ContentTypeSession extends Session with HttpMockAdapter {
-  ContentTypeSession({
-    this.contentType = ContentType.raw,
-    this.data = const {'name': 'Shay', 'age': 18},
-  });
-
-  @override
-  String? get path => '/contentType';
-
-  @override
-  ContentType? contentType;
-
-  @override
-  Object? data;
-
-  @override
-  Object? get responseData => data;
-}
-
-class TimeoutSession extends Session with HttpMockAdapter {
-  TimeoutSession();
-  @override
-  Dio get dio => super.dio..interceptors.insert(0, TimeoutInterceptor());
-
-  @override
-  String get path => '/timeout';
-
-  @override
-  Parameters? get extra => null;
-}
-
-/// 模拟請求
-mixin HttpMockAdapter<R extends BaseResp<T>, T> on RawSession<R, T> {
-  @override
-  Parameters? get extra => Extra(
-        responseData: responseData,
-        response: response,
-        status: status,
-        statusCode: statusCode,
-      ).toJson();
-
-  dynamic get response => null;
-  dynamic get responseData => null;
-  bool get status => true;
-  int? get statusCode => null;
-}
-
 class GetPageableSession extends PageableSession<Person> with HttpMockAdapter {
   GetPageableSession({super.pageNumber, super.pageSize});
-  @override
-  String? get path => '/getPageable';
+  final firstNames = [
+    'John',
+    'Emma',
+    'Michael',
+    'Sophia',
+    'James',
+    'Olivia',
+    'William',
+    'Ava',
+    'Alexander',
+    'Isabella',
+    'Liam',
+    'Mia',
+  ];
+  final lastNames = [
+    'Smith',
+    'Johnson',
+    'Brown',
+    'Taylor',
+    'Anderson',
+    'Thomas',
+    'Jackson',
+    'White',
+    'Harris',
+    'Martin',
+  ];
+
   @override
   FromJsonT<Person>? get fromJsonT => Person.fromJson;
+
+  @override
+  String? get path => '/getPageable';
 
   @override
   Map<String, dynamic> get responseData => {
@@ -149,32 +139,42 @@ class GetPageableSession extends PageableSession<Person> with HttpMockAdapter {
     final last = lastNames[Random().nextInt(lastNames.length)];
     return '$first $last';
   }
+}
 
-  final firstNames = [
-    'John',
-    'Emma',
-    'Michael',
-    'Sophia',
-    'James',
-    'Olivia',
-    'William',
-    'Ava',
-    'Alexander',
-    'Isabella',
-    'Liam',
-    'Mia',
-  ];
+class GetStringSession extends Session<String> with HttpMockAdapter {
+  GetStringSession();
 
-  final lastNames = [
-    'Smith',
-    'Johnson',
-    'Brown',
-    'Taylor',
-    'Anderson',
-    'Thomas',
-    'Jackson',
-    'White',
-    'Harris',
-    'Martin',
-  ];
+  @override
+  String get path => '/getString';
+
+  @override
+  String? get responseData => 'Hello World!';
+}
+
+/// 模拟請求
+mixin HttpMockAdapter<R extends BaseResp<T>, T> on RawSession<R, T> {
+  @override
+  Parameters? get extra => Extra(
+        responseData: responseData,
+        response: response,
+        status: status,
+        statusCode: statusCode,
+      ).toJson();
+
+  dynamic get response => null;
+  dynamic get responseData => null;
+  bool get status => true;
+  int? get statusCode => null;
+}
+
+class TimeoutSession extends Session with HttpMockAdapter {
+  TimeoutSession();
+  @override
+  Dio get dio => super.dio..interceptors.insert(0, TimeoutInterceptor());
+
+  @override
+  Parameters? get extra => null;
+
+  @override
+  String get path => '/timeout';
 }

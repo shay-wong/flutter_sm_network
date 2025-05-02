@@ -24,15 +24,6 @@ abstract class Converter<R extends BaseResp<T>, T> {
   /// 选项
   final ConverterOptions options;
 
-  /// 错误数据处理
-  R error(dynamic error) => throw UnimplementedError();
-
-  /// 异常数据处理
-  R exception(DioException exception) => throw UnimplementedError();
-
-  /// 成功数据处理
-  R success(Response response) => throw UnimplementedError();
-
   /// 拷贝
   Converter<R, T> copyWith({
     FromJsonT<T>? fromJsonT,
@@ -43,6 +34,15 @@ abstract class Converter<R extends BaseResp<T>, T> {
       options: options ?? this.options,
     );
   }
+
+  /// 错误数据处理
+  R error(dynamic error) => throw UnimplementedError();
+
+  /// 异常数据处理
+  R exception(DioException exception) => throw UnimplementedError();
+
+  /// 成功数据处理
+  R success(Response response) => throw UnimplementedError();
 }
 
 /// 转换选项
@@ -68,17 +68,6 @@ abstract class ConverterOptions {
   final ValidateT? status;
 }
 
-/// 默认选项
-class DefaultConverterOptions extends ConverterOptions {
-  // ignore: public_member_api_docs
-  const DefaultConverterOptions({
-    super.code = 'code',
-    super.message = 'message',
-    super.data = 'data',
-    super.status,
-  });
-}
-
 /// 默认数据转换
 class DefaultConverter<R extends BaseResp<T>, T> extends Converter<R, T> {
   // ignore: public_member_api_docs
@@ -101,10 +90,7 @@ class DefaultConverter<R extends BaseResp<T>, T> extends Converter<R, T> {
   R exception(DioException exception) {
     final response = exception.response;
     if (response != null) {
-      final responseData = _decodeData(response.data);
-      if (responseData is Parameters) {
-        return _handleResponse(responseData);
-      }
+      return success(response);
     }
     return error(
       exception.error ?? exception.message ?? response?.statusMessage,
@@ -173,4 +159,15 @@ class DefaultConverter<R extends BaseResp<T>, T> extends Converter<R, T> {
       status: options.status?.call(code, responseData),
     ) as R;
   }
+}
+
+/// 默认选项
+class DefaultConverterOptions extends ConverterOptions {
+  // ignore: public_member_api_docs
+  const DefaultConverterOptions({
+    super.code = 'code',
+    super.message = 'message',
+    super.data = 'data',
+    super.status,
+  });
 }

@@ -1,43 +1,45 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
 
 import '../coverters/converter.dart';
+import '../extension.dart';
 import '../http.dart';
 import '../log.dart';
 
 /// 日志拦截器
-class LogcatInterceptor extends Interceptor {
-  LogcatInterceptor({
+class HttpLogInterceptor extends Interceptor {
+  HttpLogInterceptor({
     this.maxWidth = 110,
-    this.logRequest = const LogOptions(),
-    this.logResponse = const LogOptions(),
-    this.logError = const LogOptions(),
+    LogOptions? logRequest,
+    LogOptions? logResponse,
+    LogOptions? logError,
     HttpLog? log,
     ConverterOptions? converterOptions,
   })  : _log = log,
+        _logRequest = logRequest,
+        _logResponse = logResponse,
+        _logError = logError,
         _converterOptions = converterOptions;
+
+  /// Size in which the Uint8List will be split
+  static const chunkSize = 25;
 
   /// InitialTab count to logPrint json response
   static const _kInitialTab = 1;
 
   static const _separator = '\n';
 
-  /// log error options
-  final LogOptions logError;
-
-  /// log request options
-  final LogOptions logRequest;
-
-  /// log response options
-  final LogOptions logResponse;
-
   /// Width size per logPrint
   final int maxWidth;
 
   final ConverterOptions? _converterOptions;
   final HttpLog? _log;
+  final LogOptions? _logError;
+  final LogOptions? _logRequest;
+  final LogOptions? _logResponse;
 
   /// 日志处理
   final _sb = StringBuffer();
@@ -52,8 +54,17 @@ class LogcatInterceptor extends Interceptor {
   /// 日志打印
   HttpLog get log => _log ?? Http.shared.options.log;
 
+  /// log error options
+  LogOptions get logError => _logError ?? log.options;
+
+  /// log request options
+  LogOptions get logRequest => _logRequest ?? log.options;
+
+  /// log response options
+  LogOptions get logResponse => _logResponse ?? log.options;
+
   /// 拷贝
-  LogcatInterceptor copyWith({
+  HttpLogInterceptor copyWith({
     LogOptions? logRequest,
     LogOptions? logResponse,
     LogOptions? logError,
@@ -61,7 +72,7 @@ class LogcatInterceptor extends Interceptor {
     ConverterOptions? converterOptions,
     HttpLog? log,
   }) {
-    return LogcatInterceptor(
+    return HttpLogInterceptor(
       logRequest: logRequest ?? this.logRequest,
       logResponse: logResponse ?? this.logResponse,
       logError: logError ?? this.logError,
@@ -143,25 +154,7 @@ class LogcatInterceptor extends Interceptor {
 
       _printLine('╚');
 
-      if (logError.queryParameters && uri.queryParameters.isNotEmpty) {
-        _toJson('Query Parameters', uri.queryParameters);
-      }
-      if (logError.headers && requestOptions.headers.isNotEmpty) {
-        _toJson('Headers', requestOptions.headers);
-      }
-      if (logError.data && requestOptions.data != null) {
-        _processData(requestOptions.data, requestOptions.headers['content-type']);
-      }
-      if (logError.extra && requestOptions.extra.isNotEmpty) {
-        _toJson('Extra', requestOptions.extra);
-      }
-      if (logError.responseData && data != null) {
-        _toJson('Response Data', data);
-      }
-      if (logError.curl) {
-        _getCURL(requestOptions);
-      }
-      log.error(_processStringBuffer(), err.stackTrace);
+      _logPrint(logError, requestOptions, response: err.response, stackTrace: err.stackTrace);
     } catch (e) {
       log.error(e, StackTrace.current);
     }
@@ -199,22 +192,7 @@ class LogcatInterceptor extends Interceptor {
 
       _printLine('╚');
 
-      if (logRequest.queryParameters && uri.queryParameters.isNotEmpty) {
-        _toJson('Query Parameters', uri.queryParameters);
-      }
-      if (logRequest.headers && options.headers.isNotEmpty) {
-        _toJson('Headers', options.headers);
-      }
-      if (logRequest.data && options.data != null) {
-        _processData(options.data, options.headers['content-type']);
-      }
-      if (logRequest.extra && options.extra.isNotEmpty) {
-        _toJson('Extra', options.extra);
-      }
-      if (logRequest.curl) {
-        _getCURL(options);
-      }
-      log.debug(_processStringBuffer());
+      _logPrint(logRequest, options);
     } catch (e) {
       log.error(e, StackTrace.current);
     }
@@ -260,26 +238,7 @@ class LogcatInterceptor extends Interceptor {
 
       _printLine('╚');
 
-      if (logResponse.queryParameters && uri.queryParameters.isNotEmpty) {
-        _toJson('Query Parameters', uri.queryParameters);
-      }
-      if (logResponse.headers && requestOptions.headers.isNotEmpty) {
-        _toJson('Headers', requestOptions.headers);
-      }
-      if (logResponse.data && requestOptions.data != null) {
-        _processData(requestOptions.data, requestOptions.headers['content-type']);
-      }
-      if (logResponse.extra && requestOptions.extra.isNotEmpty) {
-        _toJson('Extra', requestOptions.extra);
-      }
-      if (logResponse.responseData && response.data != null) {
-        _toJson('Response Data', response.data);
-      }
-
-      if (logResponse.curl) {
-        _getCURL(requestOptions);
-      }
-      log.debug(_processStringBuffer());
+      _logPrint(logResponse, requestOptions, response: response);
     } catch (e) {
       log.error(e, StackTrace.current);
     }
@@ -344,6 +303,43 @@ class LogcatInterceptor extends Interceptor {
     return json;
   }
 
+  void _logPrint(
+    LogOptions logOptions,
+    RequestOptions options, {
+    Response? response,
+    StackTrace? stackTrace,
+  }) {
+    final uri = options.uri;
+    if (logOptions.queryParameters && uri.queryParameters.isNotEmpty) {
+      _toJson('Query Parameters', uri.queryParameters);
+    }
+    if (logOptions.headers && options.headers.isNotEmpty) {
+      _toJson('Headers', options.headers);
+    }
+    if (logOptions.data && options.data != null) {
+      _processData(options.data, options.headers['content-type']);
+    }
+    if (logOptions.extra && options.extra.isNotEmpty) {
+      _toJson('Extra', options.extra);
+    }
+    if (logOptions.responseData && response?.data != null) {
+      _toJson(
+        'Response Data',
+        response?.data,
+        isStream: options.responseType == ResponseType.stream,
+        isBytes: options.responseType == ResponseType.bytes,
+      );
+    }
+    if (logOptions.curl) {
+      _getCURL(options);
+    }
+    if (stackTrace == null) {
+      log.debug(_processStringBuffer());
+    } else {
+      log.error(_processStringBuffer(), stackTrace);
+    }
+  }
+
   Map<String, dynamic> _mergeListToMap(List<MapEntry<String, dynamic>> inputList) {
     return inputList.fold(
       {},
@@ -391,10 +387,22 @@ class LogcatInterceptor extends Interceptor {
         } else {
           final formDataMap = <String, dynamic>{}
             ..addAll(_mergeListToMap(data.fields))
-            ..addEntries(data.files);
+            ..addEntries(
+              data.files.map(
+                (e) => MapEntry(
+                  e.key,
+                  {
+                    'filename': e.value.filename,
+                    'length': e.value.length,
+                    'contentType': e.value.contentType?.mimeType,
+                    'isFinalized': e.value.isFinalized,
+                  },
+                ),
+              ),
+            );
           _toJson('Form data', formDataMap);
         }
-      } else if (contentType == Headers.formUrlEncodedContentType) {
+      } else if (contentType == ContentType.urlencoded.value) {
         if (isCurl) {
           _sb
             ..writeAll(
@@ -427,54 +435,40 @@ class LogcatInterceptor extends Interceptor {
     return _sb.toString().removeEnd(_separator);
   }
 
-  /// LogPrint json
-  void _toJson<T>(String name, T data, {bool isCurl = false}) {
-    _printLine('╔ $name ', '╗');
-    _sb.writeln(_jsonConverter(data, isCurl: isCurl));
-    _printLine('╚');
-  }
-}
-
-/// 打印配置
-class LogOptions {
-  const LogOptions({
-    this.curl = true,
-    this.data = true,
-    this.extra = true,
-    this.headers = true,
-    this.queryParameters = true,
-    this.responseData = true,
-    this.enable = true,
-  });
-
-  /// 是否打印 curl
-  final bool curl;
-
-  /// 是否打印 [RequestOptions.data]
-  final bool data;
-
-  /// 是否允许打印
-  final bool enable;
-
-  /// 是否打印 [RequestOptions.extra]
-  final bool extra;
-
-  /// 是否打印 [RequestOptions.headers]
-  final bool headers;
-
-  /// 是否打印 [RequestOptions.queryParameters]
-  final bool queryParameters;
-
-  /// 是否打印 [Response.data]
-  /// [Interceptor.onRequest] 无效
-  final bool responseData;
-}
-
-extension _StringExt on String {
-  String removeEnd(String end) {
-    if (endsWith(end)) {
-      return substring(0, length - 1);
+  /// Process Uint8List
+  void _processUint8List(Uint8List list) {
+    final chunks = [];
+    for (var i = 0; i < list.length; i += chunkSize) {
+      chunks.add(
+        list.sublist(i, i + chunkSize > list.length ? list.length : i + chunkSize),
+      );
     }
-    return this;
+    for (final element in chunks) {
+      // ignore: avoid_dynamic_calls
+      _sb.writeln('${_indent()}${element.join(", ")},');
+    }
+  }
+
+  /// LogPrint json
+  void _toJson<T>(
+    String name,
+    T data, {
+    bool isCurl = false,
+    bool isStream = false,
+    bool isBytes = false,
+  }) {
+    _printLine('╔ $name ', '╗');
+    try {
+      if (isStream && data is ResponseBody) {
+        _sb.writeln(_jsonConverter(data.toJson()));
+      } else if (isBytes && data is Uint8List) {
+        _processUint8List(data);
+      } else {
+        _sb.writeln(_jsonConverter(data, isCurl: isCurl));
+      }
+    } catch (e) {
+      _sb.writeln('${isCurl ? '' : _indent()}$data');
+    }
+    _printLine('╚');
   }
 }

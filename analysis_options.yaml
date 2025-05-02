@@ -218,7 +218,7 @@ linter:
     # 列表中避免使用相邻字符串。
     - no_adjacent_strings_in_list
     # switch不要使用default case。
-    - no_default_cases
+    # - no_default_cases
     # 不要重复的case值。
     - no_duplicate_case_values
     # 库前缀避免前导下划线。

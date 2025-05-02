@@ -10,25 +10,35 @@ Future<void> main(List<String> args) async {
       connectTimeout: const Duration(seconds: 5),
       receiveTimeout: const Duration(seconds: 5),
       validateStatus: (status) => status != null && status == 200,
-      headers: {'user-agent': 'sm_network', 'common-header': 'xx', 'accept': 'application/json'},
+      headers: {
+        'user-agent': 'sm_network',
+        'common-header': 'xx',
+        'accept': 'application/json'
+      },
       log: HttpLog(
+        options: LogOptions(
+          curl: true,
+          data: true,
+          extra: true,
+          headers: true,
+          queryParameters: true,
+          responseData: true,
+          enable: true,
+          stream: true,
+          bytes: true,
+        ),
         error: (error, stackTrace) {
           print('$error\n$stackTrace');
         },
       ),
-      // ignore: avoid_redundant_argument_values
       converterOptions: DefaultConverterOptions(
-        // ignore: avoid_redundant_argument_values
         code: 'code',
-        // ignore: avoid_redundant_argument_values
         data: 'data',
-        // ignore: avoid_redundant_argument_values
         message: 'message',
-        // ignore: avoid_redundant_argument_values
         status: (status, data) => status == 1,
       ),
     ),
-    interceptors: [LogcatInterceptor()],
+    interceptors: [HttpLogInterceptor()],
   );
 
   runApp(MaterialApp(home: App()));
@@ -42,16 +52,16 @@ class App extends StatefulWidget {
 }
 
 class _AppState extends State<App> {
-  Future request() async {
-    final resp = await GetSession().request();
-    print(resp);
-  }
-
   @override
   void initState() {
     super.initState();
 
     request();
+  }
+
+  Future request() async {
+    final resp = await GetSession().request();
+    print(resp);
   }
 
   @override
@@ -62,8 +72,8 @@ class _AppState extends State<App> {
 
 class GetSession extends Session {
   @override
-  String? get path => '/get';
+  Parameters? get parameters => {'name': 'Shay', 'age': 18};
 
   @override
-  Parameters? get parameters => {'name': 'Shay', 'age': 18};
+  String? get path => '/get';
 }

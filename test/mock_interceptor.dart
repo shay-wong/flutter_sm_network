@@ -6,16 +6,9 @@ class MockInterceptor extends Interceptor {
     this.matcher,
     this.delay,
   });
-  final HttpRequestMatcher? matcher;
-  final Duration? delay;
 
-  /// 模拟成功請求
-  Parameters successResponse(dynamic responseData) => {
-        'code': 1,
-        'data': responseData,
-        'message': 'Success!',
-        'status': true,
-      };
+  final Duration? delay;
+  final HttpRequestMatcher? matcher;
 
   /// 模拟失敗請求
   Parameters failedResponse(dynamic responseData) => {
@@ -62,6 +55,14 @@ class MockInterceptor extends Interceptor {
 
     super.onRequest(options, handler);
   }
+
+  /// 模拟成功請求
+  Parameters successResponse(dynamic responseData) => {
+        'code': 1,
+        'data': responseData,
+        'message': 'Success!',
+        'status': true,
+      };
 }
 
 class TimeoutInterceptor extends Interceptor {
