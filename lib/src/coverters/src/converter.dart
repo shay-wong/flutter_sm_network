@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 
+import '../../extension.dart';
 import '../../http.dart';
 import 'base_resp.dart';
 import 'num_converter.dart';
@@ -100,18 +101,19 @@ class DefaultConverter<R extends BaseResp<T>, T> extends Converter<R, T> {
 
   @override
   R success(Response response) {
-    final responseData = _decodeData(response.data);
-
-    if (responseData is Parameters) {
-      return _handleResponse(responseData);
-    } else {
-      return BaseResp<T>(
-        code: response.statusCode,
-        data: responseData,
-        message: response.statusMessage,
-        status: response.requestOptions.validateStatus(response.statusCode),
-      ) as R;
+    dynamic data = response.data;
+    if (data is! Parameters) {
+      data = _decodeData(data);
     }
+    if (data is Parameters) {
+      return _handleResponse(data);
+    }
+    return BaseResp<T>(
+      code: response.statusCode,
+      data: data,
+      message: response.statusMessage,
+      status: response.requestOptions.validateStatus(response.statusCode),
+    ) as R;
   }
 
   /// 解码数据
@@ -119,6 +121,7 @@ class DefaultConverter<R extends BaseResp<T>, T> extends Converter<R, T> {
     try {
       return jsonDecode(data);
     } catch (e) {
+      Http.shared.options.log.error(e, StackTrace.current);
       return data;
     }
   }
@@ -138,10 +141,10 @@ class DefaultConverter<R extends BaseResp<T>, T> extends Converter<R, T> {
     }
   }
 
-  R _handleResponse(Parameters responseData) {
-    final code = const IntConverter().fromJson(responseData[options.code]);
-    var data = responseData[options.data];
-    final message = const StringConverter().fromJson(responseData[options.message]);
+  R _handleResponse(Parameters response) {
+    final code = const IntConverter().fromJson(response.getNestedValue(options.code));
+    var data = response.getNestedValue(options.data);
+    final message = const StringConverter().fromJson(response.getNestedValue(options.message));
 
     List<T>? list;
     if (data is List) {
@@ -156,7 +159,7 @@ class DefaultConverter<R extends BaseResp<T>, T> extends Converter<R, T> {
       data: data,
       list: list,
       message: message,
-      status: options.status?.call(code, responseData),
+      status: options.status?.call(code, response),
     ) as R;
   }
 }

@@ -36,9 +36,18 @@ class BaseResp<T> {
     try {
       final json = toJson();
       if (data != null && data is ResponseBody) {
+        // data 是 ResponseBody
         json['data'] = (data! as ResponseBody).toJson();
       } else {
-        json['data'] = data.toString();
+        try {
+          // 判断 data 是否可以转换成 json
+          jsonEncode(data);
+          // 可以转换直接赋值
+          json['data'] = data;
+        } catch (e) {
+          // data 无法转换成 json， 转换成字符串
+          json['data'] = data?.toString();
+        }
       }
       return JsonEncoder.withIndent(
         Http.shared.options.log.tabStep,

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:sm_network/sm_network.dart';
+import 'package:sm_network/src/extension.dart';
 
 import 'pageable_resp.dart';
 
@@ -69,9 +70,9 @@ class PageableConverter<R extends BaseResp<T>, T> extends Converter<R, T> {
   }
 
   R _handleResponse(Parameters responseData) {
-    final code = const IntConverter().fromJson(responseData[options.code]);
-    final data = responseData[options.data] as Parameters?;
-    final message = const StringConverter().fromJson(responseData[options.message]);
+    final code = const IntConverter().fromJson(responseData.getNestedValue(options.code));
+    final data = responseData.getNestedValue(options.data) as Parameters?;
+    final message = const StringConverter().fromJson(responseData.getNestedValue(options.message));
     final list = (data?['list'] as List?)?.map(_generateObj).whereType<T>().toList();
     final pageNumber = const IntConverter().fromJson(data?['pageNumber']);
     final pages = const IntConverter().fromJson(data?['pages']);

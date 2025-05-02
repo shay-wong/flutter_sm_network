@@ -9,7 +9,7 @@ import 'package:sm_network/sm_network.dart';
 void main() async {
   configHttp(headers: {
     // Assure the value of total argument of onReceiveProgress is not -1.
-    'HttpHeaders.acceptEncodingHeader': '*',
+    'accept-encoding': '*',
   });
 
   final url = 'https://pub.dev/static/hash-rhob5slb/img/pub-dev-logo.svg';

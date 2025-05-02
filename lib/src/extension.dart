@@ -27,3 +27,22 @@ extension StringExt on String {
     return this;
   }
 }
+
+/// [Map] 扩展
+@internal
+extension MapExt<K, V> on Map<K, V> {
+  dynamic getNestedValue(String path) {
+    // 支持 '.' 或 '>' 作为路径分隔符
+    final keys = path.split(RegExp('[.>]'));
+
+    dynamic current = this;
+    for (final key in keys) {
+      if (current is Map<String, dynamic> && current.containsKey(key)) {
+        current = current[key];
+      } else {
+        return null; // 找不到路径时返回 null
+      }
+    }
+    return current;
+  }
+}

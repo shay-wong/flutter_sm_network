@@ -19,7 +19,7 @@ class HttpBaseOptions<R extends BaseResp<T>, T> extends BaseOptions
     super.headers,
     super.preserveHeaderCase = false,
     super.responseType = ResponseType.json,
-    super.contentType,
+    ContentType? contentType,
     super.validateStatus,
     super.receiveDataWhenStatusError,
     super.followRedirects,
@@ -32,7 +32,10 @@ class HttpBaseOptions<R extends BaseResp<T>, T> extends BaseOptions
     this.converterOptions = const DefaultConverterOptions(),
     this.converter,
   })  : log = log ?? const HttpLog(),
-        super(method: method?.methodName);
+        super(
+          method: method?.methodName,
+          contentType: contentType?.value,
+        );
 
   /// 转换选项
   final ConverterOptions converterOptions;

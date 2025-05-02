@@ -111,8 +111,8 @@ class HttpLogInterceptor extends Interceptor {
         duration = '${DateTime.now().difference(_startTime!).inMilliseconds}ms';
       }
       if (data is Map<String, dynamic>) {
-        code = const IntConverter().fromJson(data[converterOptions.code]);
-        message = const StringConverter().fromJson(data[converterOptions.message]);
+        code = const IntConverter().fromJson(data.getNestedValue(converterOptions.code));
+        message = const StringConverter().fromJson(data.getNestedValue(converterOptions.message));
       } else {
         code = statusCode;
         message = statusMessage;
