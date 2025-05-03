@@ -43,6 +43,7 @@ class PageableResp<T> extends BaseResp<T> {
         'pages': pages,
         'total': total,
         'list': list,
+        'status': status,
         'error': error,
       };
 }
