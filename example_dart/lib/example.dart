@@ -3,10 +3,10 @@ import 'package:sm_network/sm_network.dart';
 Future<void> main(List<String> args) async {
   configHttp(baseUrl: 'https://httpbin.org/');
 
-  // await session1();
-  // await session2();
+  await session1();
+  await session2();
   await session3();
-  // await session4();
+  await session4();
 }
 
 void configHttp({
@@ -14,7 +14,18 @@ void configHttp({
   Map<String, dynamic>? headers,
   HttpClientAdapter? httpClientAdapter,
 }) {
+  // Or you can create dio instance and config it as follow:
+  //  final dio = Dio(BaseOptions(
+  //    baseUrl: "http://www.dtworkroom.com/doris/1/2.0.0/",
+  //    connectTimeout: const Duration(seconds: 5),
+  //    receiveTimeout: const Duration(seconds: 5),
+  //    headers: {
+  //      HttpHeaders.userAgentHeader: 'dio',
+  //      'common-header': 'xx',
+  //    },
+  //  ));
   Http.shared.config(
+    // dio: dio,
     options: HttpBaseOptions(
       baseUrl: baseUrl ?? '',
       connectTimeout: const Duration(seconds: 5),
@@ -39,24 +50,28 @@ void configHttp({
       ),
     ),
     interceptors: [
-      // Or you can create dio instance and config it as follow:
-      //  final dio = Dio(BaseOptions(
-      //    baseUrl: "http://www.dtworkroom.com/doris/1/2.0.0/",
-      //    connectTimeout: const Duration(seconds: 5),
-      //    receiveTimeout: const Duration(seconds: 5),
-      //    headers: {
-      //      HttpHeaders.userAgentHeader: 'dio',
-      //      'common-header': 'xx',
-      //    },
-      //  ));
       InterceptorsWrapper(
         onRequest: (options, handler) {
+          print('InterceptorsWrapper onRequest');
           // return handler.resolve( Response(data:"xxx"));
           // return handler.reject( DioException(message: "eh"));
           return handler.next(options);
         },
       ),
-      HttpLogInterceptor()
+      HttpLogInterceptor(
+          // onRequest: (response, handler) {
+          //   print('HttpLogInterceptor onRequest');
+          //   return handler.next(response);
+          // },
+          // onResponse: (response, handler) {
+          //   print('HttpLogInterceptor onResponse');
+          //   return handler.next(response);
+          // },
+          // onError: (response, handler) {
+          //   print('HttpLogInterceptor onError');
+          //   return handler.next(response);
+          // },
+          )
     ],
     httpClientAdapter: httpClientAdapter,
   );

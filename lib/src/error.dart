@@ -1,7 +1,7 @@
 /// 网络错误
-class NetError extends Error {
+class HttpError extends Error {
   /// Creates an assertion error with the provided [message].
-  NetError([this.message]);
+  HttpError([this.message]);
 
   /// Message describing the assertion error.
   final Object? message;
@@ -9,8 +9,17 @@ class NetError extends Error {
   @override
   String toString() {
     if (message != null) {
-      return 'Network failed: ${Error.safeToString(message)}';
+      return 'HttpError: ${Error.safeToString(message)}';
     }
-    return 'Network failed';
+    return 'HttpError unknown error';
   }
+}
+
+/// 错误码
+final class HttpErrorCode {
+  /// 错误码
+  static const error = 9001;
+
+  /// 内部错误
+  static const internalError = 9003;
 }

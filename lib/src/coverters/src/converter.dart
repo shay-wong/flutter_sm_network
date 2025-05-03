@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 
+import '../../error.dart';
 import '../../extension.dart';
 import '../../http.dart';
 import 'base_resp.dart';
@@ -37,7 +38,7 @@ abstract class Converter<R extends BaseResp<T>, T> {
   }
 
   /// 错误数据处理
-  R error(dynamic error) => throw UnimplementedError();
+  R error(dynamic error, {String? message, int? code}) => throw UnimplementedError();
 
   /// 异常数据处理
   R exception(DioException exception) => throw UnimplementedError();
@@ -80,11 +81,13 @@ class DefaultConverter<R extends BaseResp<T>, T> extends Converter<R, T> {
   @override
   R error(
     dynamic error, {
+    String? message,
     int? code,
   }) =>
       BaseResp<T>(
-        code: code ?? 400,
-        message: const StringConverter().fromJson(error),
+        error: error,
+        message: message ?? const StringConverter().fromJson(error),
+        code: code ?? HttpErrorCode.error,
       ) as R;
 
   @override
@@ -94,7 +97,8 @@ class DefaultConverter<R extends BaseResp<T>, T> extends Converter<R, T> {
       return success(response);
     }
     return error(
-      exception.error ?? exception.message ?? response?.statusMessage,
+      exception.error is HttpError ? exception.error : exception,
+      message: exception.message ?? response?.statusMessage,
       code: response?.statusCode,
     );
   }
@@ -121,7 +125,9 @@ class DefaultConverter<R extends BaseResp<T>, T> extends Converter<R, T> {
     try {
       return jsonDecode(data);
     } catch (e) {
-      Http.shared.options.log.error(e, StackTrace.current);
+      if (Http.shared.options.log.captch.converter) {
+        Http.shared.options.log.error(e, e is Error ? e.stackTrace : StackTrace.current);
+      }
       return data;
     }
   }

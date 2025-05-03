@@ -1,5 +1,4 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
-import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
@@ -8,9 +7,25 @@ import '../coverters/converter.dart';
 import '../extension.dart';
 import '../http.dart';
 import '../log.dart';
+import '../utils.dart';
+
+part '_warpper_mixin.dart';
 
 /// 日志拦截器
-class HttpLogInterceptor extends Interceptor {
+class HttpLogInterceptor extends Interceptor with _InterceptorWrapperMixin {
+  /// 网络请求日志拦截器
+  ///
+  /// [maxWidth] 日志打印最大宽度
+  ///
+  /// 请查看 [HttpLog] 和 [LogOptions] 日志配置
+  /// - [log] 全局日志配置
+  /// - [logRequest] 请求日志配置
+  /// - [logResponse] 响应日志配置
+  /// - [logError] 错误日志配置
+  ///
+  /// [ConverterOptions] 转换选项
+  ///
+  /// [onRequest]、[onResponse]、[onError] 会拦截打印，可以在其中添加自己的打印逻辑
   HttpLogInterceptor({
     this.maxWidth = 110,
     LogOptions? logRequest,
@@ -18,11 +33,17 @@ class HttpLogInterceptor extends Interceptor {
     LogOptions? logError,
     HttpLog? log,
     ConverterOptions? converterOptions,
+    InterceptorSendCallback? onRequest,
+    InterceptorSuccessCallback? onResponse,
+    InterceptorErrorCallback? onError,
   })  : _log = log,
         _logRequest = logRequest,
         _logResponse = logResponse,
         _logError = logError,
-        _converterOptions = converterOptions;
+        _converterOptions = converterOptions,
+        __onRequest = onRequest,
+        __onResponse = onResponse,
+        __onError = onError;
 
   /// Size in which the Uint8List will be split
   static const chunkSize = 25;
@@ -35,6 +56,9 @@ class HttpLogInterceptor extends Interceptor {
   /// Width size per logPrint
   final int maxWidth;
 
+  final InterceptorErrorCallback? __onError;
+  final InterceptorSendCallback? __onRequest;
+  final InterceptorSuccessCallback? __onResponse;
   final ConverterOptions? _converterOptions;
   final HttpLog? _log;
   final LogOptions? _logError;
@@ -63,6 +87,15 @@ class HttpLogInterceptor extends Interceptor {
   /// log response options
   LogOptions get logResponse => _logResponse ?? log.options;
 
+  @override
+  InterceptorErrorCallback? get _onError => __onError ?? log.onError;
+
+  @override
+  InterceptorSendCallback? get _onRequest => __onRequest ?? log.onRequest;
+
+  @override
+  InterceptorSuccessCallback? get _onResponse => __onResponse ?? log.onResponse;
+
   /// 拷贝
   HttpLogInterceptor copyWith({
     LogOptions? logRequest,
@@ -84,7 +117,7 @@ class HttpLogInterceptor extends Interceptor {
 
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
-    if (!logError.enable) {
+    if (!logError.enable || _onError != null) {
       super.onError(err, handler);
       return;
     }
@@ -156,7 +189,7 @@ class HttpLogInterceptor extends Interceptor {
 
       _logPrint(logError, requestOptions, response: err.response, stackTrace: err.stackTrace);
     } catch (e) {
-      log.error(e, StackTrace.current);
+      log.error(e, e is Error ? e.stackTrace : StackTrace.current);
     }
 
     super.onError(err, handler);
@@ -164,7 +197,7 @@ class HttpLogInterceptor extends Interceptor {
 
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
-    if (!logRequest.enable) {
+    if (!logRequest.enable || _onRequest != null) {
       super.onRequest(options, handler);
       return;
     }
@@ -194,7 +227,7 @@ class HttpLogInterceptor extends Interceptor {
 
       _logPrint(logRequest, options);
     } catch (e) {
-      log.error(e, StackTrace.current);
+      log.error(e, e is Error ? e.stackTrace : StackTrace.current);
     }
 
     super.onRequest(options, handler);
@@ -202,7 +235,7 @@ class HttpLogInterceptor extends Interceptor {
 
   @override
   void onResponse(Response response, ResponseInterceptorHandler handler) {
-    if (!logResponse.enable) {
+    if (!logResponse.enable || _onResponse != null) {
       super.onResponse(response, handler);
       return;
     }
@@ -240,7 +273,7 @@ class HttpLogInterceptor extends Interceptor {
 
       _logPrint(logResponse, requestOptions, response: response);
     } catch (e) {
-      log.error(e, StackTrace.current);
+      log.error(e, e is Error ? e.stackTrace : StackTrace.current);
     }
 
     super.onResponse(response, handler);
@@ -280,29 +313,6 @@ class HttpLogInterceptor extends Interceptor {
 
   String _indent([int tabCount = _kInitialTab]) => log.tabStep * tabCount;
 
-  /// json
-  String _jsonConverter(dynamic data, {bool isCurl = false}) {
-    if (data is String) {
-      try {
-        data = jsonDecode(data);
-      } catch (e) {
-        return '${isCurl ? '' : _indent()}$data';
-      }
-    }
-    var json = JsonEncoder.withIndent(_indent(isCurl ? 2 : 1)).convert(data);
-
-    if (isCurl) {
-      json = json.replaceRange(json.length - 1, null, '${_indent()}}');
-    } else {
-      json = json.splitMapJoin(
-        '\n',
-        onNonMatch: (line) => _indent() + line,
-      );
-    }
-
-    return json;
-  }
-
   void _logPrint(
     LogOptions logOptions,
     RequestOptions options, {
@@ -340,93 +350,39 @@ class HttpLogInterceptor extends Interceptor {
     }
   }
 
-  Map<String, dynamic> _mergeListToMap(List<MapEntry<String, dynamic>> inputList) {
-    return inputList.fold(
-      {},
-      (result, entry) {
-        final key = entry.key;
-        final value = entry.value;
-
-        if (result.containsKey(key)) {
-          if (result[key] is List) {
-            (result[key] as List).add(value);
-          } else {
-            result[key] = [result[key], value];
-          }
-        } else {
-          result[key] = value;
-        }
-
-        return result;
-      },
-    );
-  }
-
   void _printLine([String pre = '', String suf = '╝']) {
     _sb.writeln('$pre${'═' * (maxWidth - pre.length)}$suf');
   }
 
   /// 处理 data
   void _processData(dynamic data, String? contentType, {bool isCurl = false}) {
-    if (data != null) {
-      if (data is FormData) {
-        if (isCurl) {
+    final result = Utils.shared.processLogRequestData(
+      data,
+      ContentType.tryParse(contentType),
+      _indent,
+      isCurl: isCurl,
+    );
+    if (result != null) {
+      final item1 = result.item1;
+      final title = result.item2;
+      if (isCurl) {
+        if (item1 is Iterable<dynamic>) {
           _sb
             ..writeAll(
-              [
-                ...data.fields.map(
-                  (e) => '${_indent()}--form \'${e.key}="${e.value}"\'',
-                ),
-                ...data.files.map(
-                  (e) => '${_indent()}--form \'${e.key}=@"${e.value.filename}"\'',
-                ),
-              ],
+              item1,
               _separator,
             )
             ..writeln();
         } else {
-          final formDataMap = <String, dynamic>{}
-            ..addAll(_mergeListToMap(data.fields))
-            ..addEntries(
-              data.files.map(
-                (e) => MapEntry(
-                  e.key,
-                  {
-                    'filename': e.value.filename,
-                    'length': e.value.length,
-                    'contentType': e.value.contentType?.mimeType,
-                    'isFinalized': e.value.isFinalized,
-                  },
-                ),
-              ),
-            );
-          _toJson('Form data', formDataMap);
-        }
-      } else if (contentType == ContentType.urlencoded.value) {
-        if (isCurl) {
-          _sb
-            ..writeAll(
-              // ignore: avoid_dynamic_calls
-              data.entries.map(
-                (MapEntry e) {
-                  return "${_indent()}--data-urlencode '${e.key}=${e.value}'";
-                },
-              ),
-              _separator,
-            )
-            ..writeln();
-        } else {
-          _toJson('Form Urlencoded', data);
+          _sb.writeln(
+            "${_indent()}-d '$item1'",
+          );
         }
       } else {
-        if (isCurl) {
-          data = _jsonConverter(data, isCurl: isCurl);
-          _sb.writeln(
-            "${_indent()}-d '$data'",
-          );
-        } else {
-          _toJson('Request Data', data);
-        }
+        _toJson(
+          title ?? 'Request Data',
+          item1,
+        );
       }
     }
   }
@@ -460,11 +416,22 @@ class HttpLogInterceptor extends Interceptor {
     _printLine('╔ $name ', '╗');
     try {
       if (isStream && data is ResponseBody) {
-        _sb.writeln(_jsonConverter(data.toJson()));
+        _sb.writeln(
+          Utils.shared.jsonConverter(
+            data.toJson(),
+            indent: _indent,
+          ),
+        );
       } else if (isBytes && data is Uint8List) {
         _processUint8List(data);
       } else {
-        _sb.writeln(_jsonConverter(data, isCurl: isCurl));
+        _sb.writeln(
+          Utils.shared.jsonConverter(
+            data,
+            isCurl: isCurl,
+            indent: _indent,
+          ),
+        );
       }
     } catch (e) {
       _sb.writeln('${isCurl ? '' : _indent()}$data');

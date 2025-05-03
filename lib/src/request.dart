@@ -415,7 +415,7 @@ mixin RequestMixin<R extends BaseResp<T>, T> on HttpOptionsMixin<R, T>
     lengthHeader ??= this.lengthHeader ?? Headers.contentLengthHeader;
 
     try {
-      data = _utils.processData(
+      data = _utils.processRequestData(
         data: data,
         files: files,
         contentType: contentType,
@@ -454,16 +454,18 @@ mixin RequestMixin<R extends BaseResp<T>, T> on HttpOptionsMixin<R, T>
         final message = 'statusCode: ${response.statusCode}, service error(validate failed)';
         final exception = DioException(
           response: response,
-          error: NetError(message),
+          error: HttpError(message),
           type: DioExceptionType.badResponse,
           requestOptions: response.requestOptions,
           message: message,
         );
 
-        Http.shared.options.log.error(
-          'path: $path \n$exception',
-          exception.stackTrace,
-        );
+        if (Http.shared.options.log.captch.exception) {
+          Http.shared.options.log.error(
+            'path: $path \n$exception',
+            exception.stackTrace,
+          );
+        }
         throw exception;
       }
     } on DioException {
@@ -710,14 +712,12 @@ mixin RequestMixin<R extends BaseResp<T>, T> on HttpOptionsMixin<R, T>
     } on DioException catch (e) {
       return converter.exception(e);
     } catch (e) {
-      StackTrace? stackTrace;
-      if (e is Error) {
-        stackTrace = e.stackTrace;
+      if (Http.shared.options.log.captch.error) {
+        Http.shared.options.log.error(
+          'path: ${path ?? this.path} \nError: $e',
+          e is Error ? e.stackTrace : StackTrace.current,
+        );
       }
-      Http.shared.options.log.error(
-        'path: ${path ?? this.path} \nError: $e',
-        stackTrace ?? StackTrace.current,
-      );
       return converter.error(e);
     }
   }

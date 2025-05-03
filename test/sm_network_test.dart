@@ -22,49 +22,59 @@ void main() {
   test('GetStringSession', () async {
     final response = await GetStringSession().request();
     print('$response');
+    expect(response.data, 'Hello World!');
   });
 
   test('Net GetStringSession', () async {
-    final resp =
+    final response =
         await Http.session(path: '/getString', extra: Extra(responseData: 'Hello World').toJson())
             .get();
-    print(resp);
+    print(response);
+    expect(response.data, 'Hello World');
   });
 
   test('GetNumSession', () async {
     final response = await GetNumSession().request();
     print(response);
+    expect(response.data, 1234567890);
   });
 
   test('GetObjSession', () async {
     final response = await GetObjSession().request();
     print(response);
+    expect(response.data, isA<Person>());
   });
 
   test('GetObjsSession', () async {
     final response = await GetObjsSession().request();
     print(response);
+    expect(response.list, isA<List<Person>>());
   });
 
   test('GetPageableSession', () async {
     final response = await GetPageableSession().request();
     print(response);
+    expect(response.list, isA<List<Person>>());
 
     final response1 = await GetPageableSession(pageNumber: 2).request();
     print(response1);
+    expect(response.list, isA<List<Person>>());
   });
 
   test('GetErrorSession', () async {
     final response = await GetErrorSession().request();
-    print(response);
+    print(response.isSuccess);
+    expect(response.isSuccess, false);
   });
 
   test('ContentTypeSession', () async {
     final response = await ContentTypeSession(
       contentType: ContentType.raw,
       data: 'Hello World',
-    ).request();
+    ).fetch();
     print(response);
+
+    expect(response.requestOptions.data, 'Hello World');
 
     final response1 = await ContentTypeSession(
       contentType: ContentType.json,
@@ -84,8 +94,7 @@ void main() {
 
   test('TimeoutSession', () async {
     final response = await TimeoutSession().request();
-    print(response);
-    final response1 = await TimeoutSession().request();
-    print(response1);
+    print(response.dioException);
+    expect(response.dioException?.type, DioExceptionType.receiveTimeout);
   });
 }

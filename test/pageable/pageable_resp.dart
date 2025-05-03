@@ -13,6 +13,7 @@ class PageableResp<T> extends BaseResp<T> {
     this.pageSize,
     this.total,
     super.status,
+    super.error,
   });
 
   /// 当前页
@@ -35,10 +36,13 @@ class PageableResp<T> extends BaseResp<T> {
   // ignore: public_member_api_docs
   @override
   Map<String, dynamic> toJson() => {
+        'code': code,
+        'message': message,
         'pageNumber': pageNumber,
         'pageSize': pageSize,
         'pages': pages,
         'total': total,
         'list': list,
+        'error': error,
       };
 }

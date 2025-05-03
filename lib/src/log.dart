@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:typed_data' show Uint8List;
 
 import 'package:dio/dio.dart';
@@ -18,13 +19,30 @@ class HttpLog {
   // ignore: public_member_api_docs
   const HttpLog({
     this.options = const LogOptions(),
+    this.captch = const LogCatchOptions(),
     this.debug = print,
     HttpErrorLog? error,
     this.tabStep = _tabStep,
+    this.onRequest,
+    this.onResponse,
+    this.onError,
   }) : _error = error;
+
+  /// 错误拦截打印配置
+  /// 请查看 [LogCatchOptions]
+  final LogCatchOptions captch;
 
   /// 打印调试信息
   final HttpDebugLog debug;
+
+  /// 错误拦截
+  final InterceptorErrorCallback? onError;
+
+  /// 请求拦截
+  final InterceptorSendCallback? onRequest;
+
+  /// 响应拦截
+  final InterceptorSuccessCallback? onResponse;
 
   /// 打印配置
   /// 针对全部打印, 单独配置请去以下配置
@@ -46,6 +64,25 @@ class HttpLog {
       print('$error\n$stackTrace');
     }
   }
+}
+
+/// 错误拦截打印
+class LogCatchOptions {
+  // ignore: public_member_api_docs
+  const LogCatchOptions({
+    this.error = false,
+    this.exception = false,
+    this.converter = false,
+  });
+
+  /// 是否打印 [Error] 的捕获
+  final bool error;
+
+  /// 是否打印 [DioException] 的捕获
+  final bool exception;
+
+  /// 是否打印 [Converter] 中错误的捕获
+  final bool converter;
 }
 
 /// 打印配置

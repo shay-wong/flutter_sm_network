@@ -30,7 +30,7 @@ enum ContentType {
   /// multipart
   multipart;
 
-  /// 获取 content-type
+  /// 获取 content-type 值
   String get value {
     switch (this) {
       case ContentType.raw:
@@ -42,6 +42,21 @@ enum ContentType {
       case ContentType.multipart:
         return Headers.multipartFormDataContentType;
     }
+  }
+
+  /// 从 content-type 值获取 [ContentType]
+  static ContentType? tryParse(String? value) {
+    switch (value) {
+      case Headers.textPlainContentType:
+        return ContentType.raw;
+      case Headers.jsonContentType:
+        return ContentType.json;
+      case Headers.formUrlEncodedContentType:
+        return ContentType.urlencoded;
+      case Headers.multipartFormDataContentType:
+        return ContentType.multipart;
+    }
+    return null;
   }
 }
 

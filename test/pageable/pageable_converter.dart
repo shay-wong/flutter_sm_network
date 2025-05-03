@@ -11,8 +11,11 @@ class PageableConverter<R extends BaseResp<T>, T> extends Converter<R, T> {
   const PageableConverter({super.fromJsonT, super.options = const DefaultConverterOptions()});
 
   @override
-  R error(dynamic error, {int? code}) =>
-      PageableResp<T>(code: code ?? 400, message: const StringConverter().fromJson(error)) as R;
+  R error(dynamic error, {String? message, int? code}) => PageableResp<T>(
+        error: error,
+        message: message ?? const StringConverter().fromJson(error),
+        code: code ?? HttpErrorCode.error,
+      ) as R;
 
   @override
   R exception(DioException exception) {
@@ -24,7 +27,8 @@ class PageableConverter<R extends BaseResp<T>, T> extends Converter<R, T> {
       }
     }
     return error(
-      exception.error ?? exception.message ?? response?.statusMessage,
+      exception.error,
+      message: exception.message ?? response?.statusMessage,
       code: response?.statusCode,
     );
   }

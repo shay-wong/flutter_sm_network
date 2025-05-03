@@ -9,10 +9,11 @@ class BaseResp<T> {
   BaseResp({
     this.code,
     this.data,
+    Object? error,
     this.list,
     this.message,
     this.status,
-  });
+  }) : rawError = error;
 
   /// 错误码
   int? code;
@@ -26,8 +27,20 @@ class BaseResp<T> {
   /// 消息
   String? message;
 
+  /// 错误
+  Object? rawError;
+
   /// 是否成功
   bool? status;
+
+  /// 转成 [Error]
+  Error? get error => rawError is Error ? rawError as Error? : null;
+
+  /// 转成 [DioException]
+  DioException? get dioException => rawError is DioException ? rawError as DioException? : null;
+
+  /// 转成 [HttpError]
+  HttpError? get httpError => rawError is HttpError ? rawError as HttpError? : null;
 
   /// 是否成功, 默认 code == 200 成功
   bool get isSuccess => status ?? code == 200;
@@ -64,6 +77,7 @@ class BaseResp<T> {
         'list': list,
         'message': message,
         'status': status,
+        'error': error,
       };
 
   @override
