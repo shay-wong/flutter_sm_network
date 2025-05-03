@@ -1,5 +1,17 @@
 # sm_network
 
+## 1.2.0
+
+* Add support for map cascade conversion
+* Add `download` and `upload` function
+* Move `Net` to `Http`.
+* Rename `LogcatInterceptor` to `HttpLogInterceptor` and fix log error.
+* Change log enable to default `false`.
+* Add upload `files` filed
+* Fix `LogcatInterceptor` always last
+* Modify the form's log representation
+* Fix some bugs.
+
 ## 1.1.1
 
 * Compatible with Flutter 3.24.5 version
