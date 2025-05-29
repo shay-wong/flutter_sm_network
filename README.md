@@ -1,4 +1,4 @@
-# sm_network
+# sm_network(This repository has been archived. [Please go to](https://github.com/shay-wong/flutter_sm_packages/tree/main/sm_network))
 
 | [English](README.md) | [简体中文](README.zh.md) |
 | ------------------------------- | ----------------------- |
