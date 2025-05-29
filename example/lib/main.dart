@@ -6,7 +6,7 @@ import 'package:example/model.dart';
 import 'package:flutter/material.dart';
 import 'package:sm_network/sm_network.dart';
 
-Future<void> main(List<String> args) async {
+void main(List<String> args) {
   Http.shared.config(
     options: HttpBaseOptions(
       baseUrl: 'https://httpbin.org/',
@@ -21,16 +21,16 @@ Future<void> main(List<String> args) async {
         'accept-encoding': 'application/json',
       },
       log: HttpLog(
-        options: LogOptions(
-          curl: true,
-          data: true,
-          extra: true,
+        options: LogOptions.allow(
+          enable: true,
           headers: true,
+          data: true,
+          extra: false,
           queryParameters: true,
           responseData: true,
-          enable: true,
-          stream: true,
-          bytes: true,
+          curl: true,
+          stream: false,
+          bytes: false,
         ),
         error: (error, stackTrace) {
           log('$error\n$stackTrace', name: 'Error');
@@ -43,7 +43,23 @@ Future<void> main(List<String> args) async {
         status: (status, data) => status == 200,
       ),
     ),
-    interceptors: [HttpLogInterceptor()],
+    interceptors: [
+      HttpLogInterceptor(
+        maxWidth: 120,
+        // onRequest: (response, handler) {
+        //   print('HttpLogInterceptor onRequest');
+        //   return handler.next(response);
+        // },
+        // onResponse: (response, handler) {
+        //   print('HttpLogInterceptor onResponse');
+        //   return handler.next(response);
+        // },
+        // onError: (response, handler) {
+        //   print('HttpLogInterceptor onError');
+        //   return handler.next(response);
+        // },
+      ),
+    ],
   );
 
   runApp(MaterialApp(home: App()));
